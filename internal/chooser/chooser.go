@@ -2,7 +2,6 @@
 package chooser
 
 import (
-	"fmt"
 	"sync"
 
 	"charm.land/bubbles/v2/key"
@@ -10,14 +9,6 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	g "gitlab.com/AgentNemo/goradios"
-)
-
-type Mode int
-
-const (
-	countries Mode = iota
-	stations
 )
 
 type styleMap struct {
@@ -47,6 +38,7 @@ var (
 type item struct {
 	title       string
 	description string
+	id          string
 }
 
 func (i item) Title() string       { return i.title }
@@ -88,7 +80,7 @@ type model struct {
 	width, height int
 	once          *sync.Once
 	list          list.Model
-	mode          Mode
+	source        source
 }
 
 func (m model) Init() tea.Cmd {
@@ -173,18 +165,14 @@ func InitialModel() model {
 	// Initialize the model and list.
 	m := model{}
 	lightDark = lipgloss.LightDark(true)
-	m.mode = countries
+	m.source = defaultCountrySource()
 
-	countries := g.FetchCountries()
-	items := make([]list.Item, len(countries))
-	for i, c := range countries {
-		items[i] = item{title: c.Name, description: fmt.Sprintf("Stations: %d", c.StationCount)}
-	}
+	items := m.source.items()
 
 	// Setup list.
 	delegate := newItemDelegate()
 	countryList := list.New(items, delegate, 0, 0)
-	countryList.Title = "Countries"
+	countryList.Title = string(m.source.category())
 	countryList.Styles.Title = styles.title
 	countryList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
