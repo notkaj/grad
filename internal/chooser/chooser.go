@@ -32,6 +32,7 @@ var (
 		app: lipgloss.
 			NewStyle().
 			Padding(1, 2).
+			Margin(1).
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(lipgloss.Color("#c4068b")),
 		title: lipgloss.NewStyle().
