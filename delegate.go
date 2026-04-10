@@ -29,22 +29,23 @@ func update(msg tea.Msg, m *list.Model) tea.Cmd {
 			return m.NewStatusMessage(styles.statusMessage.Render("You chose " + title))
 		}
 
-		if key.Matches(b, keys.remove) {
-			index := m.Index()
-			m.RemoveItem(index)
-			if len(m.Items()) == 0 {
-				keys.remove.SetEnabled(false)
-			}
-			return m.NewStatusMessage(styles.statusMessage.Render("Deleted " + title))
-
+		if key.Matches(b, keys.quickview) {
+			return m.NewStatusMessage(styles.statusMessage.Render("quick view: "))
 		}
+		// if key.Matches(b, keys.remove) {
+		// 	index := m.Index()
+		// 	m.RemoveItem(index)
+		// 	if len(m.Items()) == 0 {
+		// 		keys.remove.SetEnabled(false)
+		// 	}
+		// 	return m.NewStatusMessage(styles.statusMessage.Render("Deleted " + title))
 	}
 	return nil
 }
 
 type keyMap struct {
-	choose key.Binding
-	remove key.Binding
+	choose    key.Binding
+	quickview key.Binding
 }
 
 var keys = keyMap{
@@ -52,9 +53,9 @@ var keys = keyMap{
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "choose"),
 	),
-	remove: key.NewBinding(
-		key.WithKeys("x", "backspace"),
-		key.WithHelp("x", "delete"),
+	quickview: key.NewBinding(
+		key.WithKeys("i"),
+		key.WithHelp("i", "quick view"),
 	),
 }
 
@@ -63,7 +64,7 @@ var keys = keyMap{
 func (d keyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
 		d.choose,
-		d.remove,
+		d.quickview,
 	}
 }
 
@@ -73,7 +74,7 @@ func (d keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{
 			d.choose,
-			d.remove,
+			d.quickview,
 		},
 	}
 }
