@@ -1,4 +1,5 @@
-package main
+// Package world provides list of countries
+package world
 
 import (
 	"fmt"
@@ -155,7 +156,7 @@ func (m model) View() tea.View {
 	return v
 }
 
-func initialModel() model {
+func InitialModel() model {
 	// Initialize the model and list.
 	m := model{}
 	lightDark = lipgloss.LightDark(true)
