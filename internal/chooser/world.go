@@ -1,5 +1,5 @@
-// Package world provides list of countries
-package world
+// Package chooser provides list of countries
+package chooser
 
 import (
 	"fmt"
@@ -13,6 +13,13 @@ import (
 	g "gitlab.com/AgentNemo/goradios"
 )
 
+type Mode int
+
+const (
+	countries Mode = iota
+	stations
+)
+
 type styleMap struct {
 	app           lipgloss.Style
 	title         lipgloss.Style
@@ -22,14 +29,17 @@ type styleMap struct {
 var (
 	lightDark = lipgloss.LightDark(true)
 	styles    = styleMap{
-		app: lipgloss.NewStyle().
-			Padding(1, 2),
+		app: lipgloss.
+			NewStyle().
+			Padding(1, 2).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("#c4068b")),
 		title: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#25A065")).
+			Background(lipgloss.Color("#c4068b")).
 			Padding(0, 1),
 		statusMessage: lipgloss.NewStyle().
-			Foreground(lightDark(lipgloss.Color("#04B575"), lipgloss.Color("#04B575"))),
+			Foreground(lightDark(lipgloss.Color("#c4068b"), lipgloss.Color("#c4068b"))),
 	}
 )
 
@@ -77,6 +87,7 @@ type model struct {
 	width, height int
 	once          *sync.Once
 	list          list.Model
+	mode          Mode
 }
 
 func (m model) Init() tea.Cmd {
@@ -161,14 +172,7 @@ func InitialModel() model {
 	// Initialize the model and list.
 	m := model{}
 	lightDark = lipgloss.LightDark(true)
-
-	// Make initial list of items.
-	// var itemGenerator randomItemGenerator
-	// const numItems = 24
-	// items := make([]list.Item, numItems)
-	// for i := range numItems {
-	// 	items[i] = itemGenerator.next()
-	// }
+	m.mode = countries
 
 	countries := g.FetchCountries()
 	items := make([]list.Item, len(countries))

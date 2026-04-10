@@ -1,4 +1,4 @@
-package world
+package chooser
 
 import (
 	"charm.land/bubbles/v2/key"
@@ -32,13 +32,6 @@ func update(msg tea.Msg, m *list.Model) tea.Cmd {
 		if key.Matches(b, keys.quickview) {
 			return m.NewStatusMessage(styles.statusMessage.Render("quick view: "))
 		}
-		// if key.Matches(b, keys.remove) {
-		// 	index := m.Index()
-		// 	m.RemoveItem(index)
-		// 	if len(m.Items()) == 0 {
-		// 		keys.remove.SetEnabled(false)
-		// 	}
-		// 	return m.NewStatusMessage(styles.statusMessage.Render("Deleted " + title))
 	}
 	return nil
 }
