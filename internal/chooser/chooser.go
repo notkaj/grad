@@ -45,34 +45,19 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.description }
 func (i item) FilterValue() string { return i.title }
 
-type listKeyMap struct {
-	toggleSpinner    key.Binding
-	toggleTitleBar   key.Binding
-	toggleStatusBar  key.Binding
-	togglePagination key.Binding
-	toggleHelpMenu   key.Binding
+type keyMap struct {
+	choose    key.Binding
+	quickview key.Binding
 }
 
-var listKeys = listKeyMap{
-	toggleSpinner: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "toggle spinner"),
+var keys = keyMap{
+	choose: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "choose"),
 	),
-	toggleTitleBar: key.NewBinding(
-		key.WithKeys("T"),
-		key.WithHelp("T", "toggle title"),
-	),
-	toggleStatusBar: key.NewBinding(
-		key.WithKeys("S"),
-		key.WithHelp("S", "toggle status"),
-	),
-	togglePagination: key.NewBinding(
-		key.WithKeys("P"),
-		key.WithHelp("P", "toggle pagination"),
-	),
-	toggleHelpMenu: key.NewBinding(
-		key.WithKeys("H"),
-		key.WithHelp("H", "toggle help"),
+	quickview: key.NewBinding(
+		key.WithKeys("i"),
+		key.WithHelp("i", "quick view"),
 	),
 }
 
@@ -113,40 +98,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		// Don't match any of the keys below if we're actively filtering.
-		if m.list.FilterState() == list.Filtering {
-			break
-		}
+	i, ok := m.list.SelectedItem().(item)
+	if ok {
+		title := i.Title()
+		id := i.id
 
-		switch {
-		case key.Matches(msg, listKeys.toggleSpinner):
-			cmd := m.list.ToggleSpinner()
-			return m, cmd
+		switch msg := msg.(type) {
+		case tea.KeyPressMsg:
+			// Don't match any of the keys below if we're actively filtering.
+			if m.list.FilterState() == list.Filtering {
+				break
+			}
 
-		case key.Matches(msg, listKeys.toggleTitleBar):
-			v := !m.list.ShowTitle()
-			m.list.SetShowTitle(v)
-			m.list.SetShowFilter(v)
-			m.list.SetFilteringEnabled(v)
-			return m, nil
+			if key.Matches(msg, keys.choose) {
+				if m.source.category() == stations {
+					return m, nil
+				}
+				m.source = defaultStationSource(id)
+				itemsCmd := m.list.SetItems(m.source.items())
+				statusCmd := m.list.NewStatusMessage(styles.statusMessage.Render("You chose " + title))
+				m.list.Title = string(m.source.category())
+				return m, tea.Batch(itemsCmd, statusCmd)
+			}
 
-		case key.Matches(msg, listKeys.toggleStatusBar):
-			m.list.SetShowStatusBar(!m.list.ShowStatusBar())
-			return m, nil
-
-		case key.Matches(msg, listKeys.togglePagination):
-			m.list.SetShowPagination(!m.list.ShowPagination())
-			return m, nil
-
-		case key.Matches(msg, listKeys.toggleHelpMenu):
-			m.list.SetShowHelp(!m.list.ShowHelp())
-			return m, nil
-
+			if key.Matches(msg, keys.quickview) {
+				return m, m.list.NewStatusMessage(styles.statusMessage.Render("quick view for " + id))
+			}
 		}
 	}
-
 	// This will also call our delegate's update function.
 	newListModel, cmd := m.list.Update(msg)
 	m.list = newListModel
@@ -176,11 +155,8 @@ func InitialModel() model {
 	countryList.Styles.Title = styles.title
 	countryList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
-			listKeys.toggleSpinner,
-			listKeys.toggleTitleBar,
-			listKeys.toggleStatusBar,
-			listKeys.togglePagination,
-			listKeys.toggleHelpMenu,
+			keys.choose,
+			keys.quickview,
 		}
 	}
 
