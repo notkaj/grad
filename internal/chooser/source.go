@@ -104,6 +104,9 @@ func (stationSource) category() category {
 }
 
 func defaultStationSource(countryCode string) stationSource {
+	if countryCode == "ALL" {
+		return allStationSource()
+	}
 	return stationSource{
 		order:      g.StationsOrderClickCount,
 		by:         g.StationsByCountryCodeExact,
