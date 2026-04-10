@@ -7,6 +7,7 @@ import (
 
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/list"
+	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	g "gitlab.com/AgentNemo/goradios"
@@ -191,6 +192,7 @@ func InitialModel() model {
 	}
 
 	m.list = countryList
+	m.list.SetSpinner(spinner.Dot)
 
 	return m
 }
