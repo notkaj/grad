@@ -1,4 +1,4 @@
-package chooser
+package world
 
 import (
 	"charm.land/bubbles/v2/key"

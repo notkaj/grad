@@ -1,5 +1,5 @@
-// Package chooser provides list of countries
-package chooser
+// Package world provides list of countries
+package world
 
 import (
 	"sync"
@@ -9,45 +9,14 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	c "github.com/notkaj/grad/internal/selection/common"
+	s "github.com/notkaj/grad/internal/style"
 )
-
-type styleMap struct {
-	app           lipgloss.Style
-	title         lipgloss.Style
-	statusMessage lipgloss.Style
-}
-
-var (
-	lightDark = lipgloss.LightDark(true)
-	styles    = styleMap{
-		app: lipgloss.
-			NewStyle().
-			Padding(1, 2).
-			Margin(1).
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("#c4068b")),
-		title: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#c4068b")).
-			Padding(0, 1),
-		statusMessage: lipgloss.NewStyle().
-			Foreground(lightDark(lipgloss.Color("#c4068b"), lipgloss.Color("#c4068b"))),
-	}
-)
-
-type item struct {
-	title       string
-	description string
-	id          string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.description }
-func (i item) FilterValue() string { return i.title }
 
 type keyMap struct {
 	choose    key.Binding
 	quickview key.Binding
+	back      key.Binding
 }
 
 var keys = keyMap{
@@ -59,36 +28,40 @@ var keys = keyMap{
 		key.WithKeys("i"),
 		key.WithHelp("i", "quick view"),
 	),
+	back: key.NewBinding(
+		key.WithKeys("backspace"),
+		key.WithHelp("backspace", "back"),
+	),
 }
 
-type model struct {
+type Model struct {
 	width, height int
 	once          *sync.Once
 	list          list.Model
 	source        source
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.RequestBackgroundColor,
 	)
 }
 
-func (m *model) updateListProperties() {
+func (m *Model) updateListProperties() {
 	// Update list size.
-	h, v := styles.app.GetFrameSize()
+	h, v := s.Styles.App.GetFrameSize()
 	m.list.SetSize(m.width-h, m.height-v)
 
 	// Update the model and list styles.
-	m.list.Styles.Title = styles.title
+	m.list.Styles.Title = s.Styles.Title
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
-		lightDark = lipgloss.LightDark(msg.IsDark())
+		s.LightDark = lipgloss.LightDark(msg.IsDark())
 		m.updateListProperties()
 		return m, nil
 
@@ -98,10 +71,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	i, ok := m.list.SelectedItem().(item)
+	i, ok := m.list.SelectedItem().(c.Item)
 	if ok {
 		title := i.Title()
-		id := i.id
+		id := i.ID
 
 		switch msg := msg.(type) {
 		case tea.KeyPressMsg:
@@ -116,13 +89,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.source = defaultStationSource(id)
 				itemsCmd := m.list.SetItems(m.source.items())
-				statusCmd := m.list.NewStatusMessage(styles.statusMessage.Render("You chose " + title))
+				statusCmd := m.list.NewStatusMessage(s.Styles.StatusMessage.Render("You chose " + title))
 				m.list.Title = string(m.source.category())
 				return m, tea.Batch(itemsCmd, statusCmd)
 			}
 
+			if key.Matches(msg, keys.back) {
+				if m.source.category() == countries {
+					return m, nil
+				}
+				m.source = defaultCountrySource()
+				itemsCmd := m.list.SetItems(m.source.items())
+				m.list.Title = string(m.source.category())
+				return m, itemsCmd
+			}
+
 			if key.Matches(msg, keys.quickview) {
-				return m, m.list.NewStatusMessage(styles.statusMessage.Render("quick view for " + id))
+				return m, m.list.NewStatusMessage(s.Styles.StatusMessage.Render("quick view for " + id))
 			}
 		}
 	}
@@ -134,16 +117,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView(styles.app.Render(m.list.View()))
+func (m Model) View() tea.View {
+	v := tea.NewView(s.Styles.App.Render(m.list.View()))
 	v.AltScreen = true
 	return v
 }
 
-func InitialModel() model {
+func InitialModel() Model {
 	// Initialize the model and list.
-	m := model{}
-	lightDark = lipgloss.LightDark(true)
+	m := Model{}
+	s.LightDark = lipgloss.LightDark(true)
 	m.source = defaultCountrySource()
 
 	items := m.source.items()
@@ -152,7 +135,7 @@ func InitialModel() model {
 	delegate := newItemDelegate()
 	countryList := list.New(items, delegate, 0, 0)
 	countryList.Title = string(m.source.category())
-	countryList.Styles.Title = styles.title
+	countryList.Styles.Title = s.Styles.Title
 	countryList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			keys.choose,

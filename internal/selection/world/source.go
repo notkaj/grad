@@ -1,10 +1,11 @@
-package chooser
+package world
 
 import (
 	"fmt"
 	"strings"
 
 	"charm.land/bubbles/v2/list"
+	"github.com/notkaj/grad/internal/selection/common"
 	g "gitlab.com/AgentNemo/goradios"
 )
 
@@ -33,18 +34,12 @@ func (c countrySource) items() []list.Item {
 	items := make([]list.Item, len+1)
 	sum := 0
 	for i, country := range countries {
-		items[i+1] = item{
-			title:       country.Name,
-			description: fmt.Sprintf("Station %d", country.StationCount),
-			id:          country.Code,
-		}
+		desc := fmt.Sprintf("Station %d", country.StationCount)
+		items[i+1] = common.NewItem(country.Name, desc, country.Code)
 		sum += country.StationCount
 	}
-	items[0] = item{
-		title:       "All",
-		description: fmt.Sprintf("Stations %d", sum),
-		id:          "ALL",
-	}
+
+	items[0] = common.AllItem
 	if c.includeAcc {
 		return items
 	}
@@ -90,11 +85,7 @@ func (s stationSource) items() []list.Item {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
 
-		items[i] = item{
-			title:       station.Name,
-			description: builder.String(),
-			id:          station.StationUUID,
-		}
+		items[i] = common.NewItem(station.Name, builder.String(), station.StationUUID)
 	}
 	return items
 }
