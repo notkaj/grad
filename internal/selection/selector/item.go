@@ -1,5 +1,4 @@
-// Package common proves common values across selectors
-package common
+package selector
 
 type Item struct {
 	title       string

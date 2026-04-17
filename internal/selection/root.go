@@ -2,21 +2,49 @@
 package selection
 
 import (
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	c "github.com/notkaj/grad/internal/selection/country"
+	sel "github.com/notkaj/grad/internal/selection/selector"
 	w "github.com/notkaj/grad/internal/selection/world"
 )
 
-type Root struct {
+type Model struct {
 	world   *w.Model
 	country *c.Model
-	screen  tea.Model
+	screen  sel.Selector
 }
 
-func InitialModel() Root {
+func (m *Model) Init() tea.Cmd {
+	return m.screen.Init()
+}
+
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		switch {
+		case key.Matches(msg, Keys.Choose):
+			switch t := m.screen.(type) {
+			case *w.Model:
+				id := t.ID()
+				m.country.Select(sel.CountryCodeMsg(id))
+				m.screen = m.country
+				return m, m.screen.Populate()
+			}
+		}
+	}
+	_, cmd := m.screen.Update(msg)
+	return m, cmd
+}
+
+func (m *Model) View() tea.View {
+	return m.screen.View()
+}
+
+func InitialModel() *Model {
 	worldModel := w.InitialModel()
 	countryModel := c.InitialModel()
-	return Root{
+	return &Model{
 		world:   &worldModel,
 		country: &countryModel,
 		screen:  &worldModel,
