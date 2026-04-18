@@ -47,6 +47,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.screen = m.country
 				return m, m.screen.Populate()
 			}
+		case key.Matches(msg, Keys.Back):
+			switch m.screen.(type) {
+			case *c.Model:
+				m.screen = m.world
+				return m, nil
+			}
 		}
 	}
 	_, cmd := m.screen.Update(msg)
