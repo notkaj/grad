@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"charm.land/bubbles/v2/list"
-	sel "github.com/notkaj/grad/internal/selection/selector"
 	g "gitlab.com/AgentNemo/goradios"
 )
 
@@ -19,14 +18,14 @@ func (c source) items() []list.Item {
 	countries := g.FetchCountries()
 	len := len(countries)
 	items := make([]list.Item, len+1)
-	sum := 0
+	sum := int(0)
 	for i, country := range countries {
 		desc := fmt.Sprintf("%d Stations", country.StationCount)
-		items[i+1] = sel.NewItem(country.Name, desc, country.Code)
+		items[i+1] = NewItem(country.Name, desc, country.Code, int(country.StationCount))
 		sum += country.StationCount
 	}
 
-	items[0] = sel.AllItem(sum)
+	items[0] = AllItem(sum)
 	if c.includeAcc {
 		return items
 	}

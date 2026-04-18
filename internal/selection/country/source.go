@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"charm.land/bubbles/v2/list"
-	sel "github.com/notkaj/grad/internal/selection/selector"
 	g "gitlab.com/AgentNemo/goradios"
 )
 
@@ -38,7 +37,7 @@ func (s source) items() []list.Item {
 		// } else {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
-		items[i] = sel.NewItem(station.Name, builder.String(), station.StationUUID)
+		items[i] = NewItem(station.Name, builder.String(), station.StationUUID)
 	}
 	return items
 }

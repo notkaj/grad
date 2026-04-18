@@ -8,7 +8,6 @@ import (
 
 type Selector interface {
 	tea.Model
-	ID() string
 	Populate() tea.Cmd
 	Select(Msg)
 	IsFiltering() bool
@@ -18,6 +17,7 @@ type PopulatedMsg []list.Item
 
 type Msg any
 
-type (
-	CountryCodeMsg string
-)
+type CountrySelectedMsg struct {
+	Code  string
+	Count int
+}

@@ -15,6 +15,7 @@ type Model struct {
 	list          list.Model
 	source        source
 	fetching      bool
+	totalCount    int
 }
 
 func (m *Model) updateListProperties() {
@@ -54,7 +55,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	newListModel, cmd := m.list.Update(msg)
 	cmds = append(cmds, cmd)
 	m.list = newListModel
-	if m.list.Paginator.OnLastPage() && !m.fetching && !m.IsFiltering() {
+	if m.list.Paginator.OnLastPage() &&
+		!m.fetching &&
+		!m.IsFiltering() &&
+		len(m.list.Items()) < m.totalCount {
 		m.fetching = true
 		cmds = append(cmds, m.Populate())
 	}
@@ -67,10 +71,11 @@ func (m *Model) View() tea.View {
 }
 
 func (m *Model) ID() string {
-	item, ok := m.list.SelectedItem().(sel.Item)
+	i, ok := m.list.SelectedItem().(item)
 	if ok {
-		return item.ID
+		return i.ID
 	}
+	// TODO: should probably throw an error or something
 	return ""
 }
 
@@ -90,8 +95,10 @@ func (m *Model) Select(msg sel.Msg) {
 	var items []list.Item
 	m.list.SetItems(items)
 	switch msg := msg.(type) {
-	case sel.CountryCodeMsg:
-		code := string(msg)
+	case sel.CountrySelectedMsg:
+		code := msg.Code
+		size := msg.Count
+		m.totalCount = size
 		if code == "ALL" {
 			m.source = allStationSource()
 		} else {

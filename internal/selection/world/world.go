@@ -66,12 +66,12 @@ func (m *Model) View() tea.View {
 	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
-func (m *Model) ID() string {
-	item, ok := m.list.SelectedItem().(sel.Item)
+func (m *Model) Info() (string, int) {
+	i, ok := m.list.SelectedItem().(item)
 	if ok {
-		return item.ID
+		return i.ID, i.Count
 	}
-	return "FI"
+	return "", 0
 }
 
 func (m *Model) Populate() tea.Cmd {
