@@ -4,12 +4,24 @@ package country
 import (
 	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	sel "github.com/notkaj/grad/internal/selection/selector"
+	s "github.com/notkaj/grad/internal/style"
 )
 
 type Model struct {
-	list   list.Model
-	Source source
+	width, height int
+	list          list.Model
+	Source        source
+}
+
+func (m *Model) updateListProperties() {
+	// Update list size.
+	h, v := s.Styles.App.GetFrameSize()
+	m.list.SetSize(m.width-h, m.height-v)
+
+	// Update the model and list styles.
+	m.list.Styles.Title = s.Styles.Title
 }
 
 func (m Model) Init() tea.Cmd {
@@ -17,7 +29,17 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg.(type) {
+	switch msg := msg.(type) {
+	case tea.BackgroundColorMsg:
+		s.LightDark = lipgloss.LightDark(msg.IsDark())
+		m.updateListProperties()
+		return m, nil
+
+	case tea.WindowSizeMsg:
+		m.width, m.height = msg.Width, msg.Height
+		m.updateListProperties()
+		return m, nil
+
 	case sel.PopulatedMsg:
 		m.list.StopSpinner()
 		return m, nil
