@@ -12,7 +12,7 @@ type Selector interface {
 
 type PopulatedMsg string
 
-type Msg interface{}
+type Msg any
 
 type (
 	CountryCodeMsg string
