@@ -70,7 +70,7 @@ func (m *Model) ID() string {
 	if ok {
 		return item.ID
 	}
-	return ""
+	return "FI"
 }
 
 func (m *Model) Populate() tea.Cmd {

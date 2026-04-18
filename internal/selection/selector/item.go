@@ -22,8 +22,8 @@ func AllItem(acc int) Item {
 	}
 }
 
-func NewItem(title string, desc string, id string) *Item {
-	return &Item{
+func NewItem(title string, desc string, id string) Item {
+	return Item{
 		title:       title,
 		description: desc,
 		ID:          id,

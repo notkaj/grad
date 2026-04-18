@@ -20,9 +20,9 @@ type source struct {
 func (s source) items() []list.Item {
 	var stations []g.Station
 	if s.by == "" {
-		stations = g.FetchAllStationsDetailed(s.order, s.reversed, 0, 100, s.hideBroken)
+		stations = g.FetchAllStationsDetailed(s.order, s.reversed, 0, 200, s.hideBroken)
 	} else {
-		stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, 0, 500, s.hideBroken)
+		stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, 0, 200, s.hideBroken)
 	}
 	len := len(stations)
 	items := make([]list.Item, len)
