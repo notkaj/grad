@@ -26,8 +26,7 @@ func (c source) items() []list.Item {
 		sum += country.StationCount
 	}
 
-	allItem := sel.AllItem(sum)
-	items[0] = allItem
+	items[0] = sel.AllItem(sum)
 	if c.includeAcc {
 		return items
 	}

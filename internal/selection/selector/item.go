@@ -1,6 +1,8 @@
 package selector
 
-import "strconv"
+import (
+	"fmt"
+)
 
 type Item struct {
 	title       string
@@ -15,7 +17,7 @@ func (i Item) FilterValue() string { return i.title }
 func AllItem(acc int) Item {
 	return Item{
 		title:       "All",
-		description: strconv.Itoa(acc),
+		description: fmt.Sprintf("%d Stations", acc),
 		ID:          "ALL",
 	}
 }
