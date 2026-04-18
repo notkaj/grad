@@ -3,6 +3,7 @@ package country
 
 import (
 	"charm.land/bubbles/v2/list"
+	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	sel "github.com/notkaj/grad/internal/selection/selector"
@@ -24,11 +25,11 @@ func (m *Model) updateListProperties() {
 	m.list.Styles.Title = s.Styles.Title
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
 		s.LightDark = lipgloss.LightDark(msg.IsDark())
@@ -42,16 +43,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case sel.PopulatedMsg:
 		m.list.StopSpinner()
-		return m, nil
 	}
-	return m, nil
+
+	// This will also call our delegate's update function.
+	newListModel, cmd := m.list.Update(msg)
+	m.list = newListModel
+
+	return m, cmd
 }
 
-func (m Model) View() tea.View {
+func (m *Model) View() tea.View {
 	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
-func (m Model) ID() string {
+func (m *Model) ID() string {
 	item, ok := m.list.SelectedItem().(sel.Item)
 	if ok {
 		return item.ID
@@ -59,7 +64,7 @@ func (m Model) ID() string {
 	return ""
 }
 
-func (m Model) Populate() tea.Cmd {
+func (m *Model) Populate() tea.Cmd {
 	return tea.Batch(
 		m.list.StartSpinner(),
 		func() tea.Msg {
@@ -86,7 +91,17 @@ func (m *Model) IsFiltering() bool {
 }
 
 func InitialModel() Model {
-	return Model{
-		list: list.Model{},
-	}
+	m := Model{}
+	s.LightDark = lipgloss.LightDark(true)
+
+	// Setup list.
+	delegate := newItemDelegate()
+	stationsList := list.New(nil, delegate, 0, 0)
+	stationsList.Title = "Stations"
+	stationsList.Styles.Title = s.Styles.Title
+
+	m.list = stationsList
+	m.list.SetSpinner(spinner.Line)
+
+	return m
 }

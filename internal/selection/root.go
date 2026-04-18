@@ -21,6 +21,19 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.BackgroundColorMsg:
+		// s.LightDark = lipgloss.LightDark(msg.IsDark())
+		// m.updateListProperties()
+		// return m, nil
+		m.country.Update(msg)
+		m.world.Update(msg)
+		return m, nil
+	case tea.WindowSizeMsg:
+		// m.width, m.height = msg.Width, msg.Height
+		// m.updateListProperties()
+		// return m, nil
+		m.world.Update(msg)
+		m.country.Update(msg)
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
 			break
