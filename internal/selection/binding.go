@@ -3,13 +3,13 @@ package selection
 import "charm.land/bubbles/v2/key"
 
 type KeyMap struct {
-	Choose    key.Binding
+	Select    key.Binding
 	Quickview key.Binding
 	Back      key.Binding
 }
 
 var Keys = KeyMap{
-	Choose: key.NewBinding(
+	Select: key.NewBinding(
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "choose"),
 	),

@@ -22,8 +22,11 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if m.screen.IsFiltering() {
+			break
+		}
 		switch {
-		case key.Matches(msg, Keys.Choose):
+		case key.Matches(msg, Keys.Select):
 			switch t := m.screen.(type) {
 			case *w.Model:
 				id := t.ID()
