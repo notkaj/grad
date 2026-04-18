@@ -1,7 +1,10 @@
 // Package selector provides interface Selector
 package selector
 
-import tea "charm.land/bubbletea/v2"
+import (
+	"charm.land/bubbles/v2/list"
+	tea "charm.land/bubbletea/v2"
+)
 
 type Selector interface {
 	tea.Model
@@ -11,7 +14,7 @@ type Selector interface {
 	IsFiltering() bool
 }
 
-type PopulatedMsg string
+type PopulatedMsg []list.Item
 
 type Msg any
 

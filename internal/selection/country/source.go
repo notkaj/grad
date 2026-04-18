@@ -10,19 +10,22 @@ import (
 )
 
 type source struct {
-	order      g.StationsOrder
-	by         g.StationsBy
-	term       string
-	reversed   bool
-	hideBroken bool
+	order        g.StationsOrder
+	by           g.StationsBy
+	term         string
+	reversed     bool
+	hideBroken   bool
+	currentChunk uint
+	chunkSize    uint
 }
 
 func (s source) items() []list.Item {
 	var stations []g.Station
+	start := s.currentChunk * s.chunkSize
 	if s.by == "" {
-		stations = g.FetchAllStationsDetailed(s.order, s.reversed, 0, 200, s.hideBroken)
+		stations = g.FetchAllStationsDetailed(s.order, s.reversed, start, s.chunkSize, s.hideBroken)
 	} else {
-		stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, 0, 200, s.hideBroken)
+		stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, start, s.chunkSize, s.hideBroken)
 	}
 	len := len(stations)
 	items := make([]list.Item, len)
@@ -35,7 +38,6 @@ func (s source) items() []list.Item {
 		// } else {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
-
 		items[i] = sel.NewItem(station.Name, builder.String(), station.StationUUID)
 	}
 	return items
@@ -46,18 +48,26 @@ func stationsByCountryCodeSource(countryCode string) source {
 		return allStationSource()
 	}
 	return source{
-		order:      g.StationsOrderClickCount,
-		by:         g.StationsByCountryCodeExact,
-		term:       countryCode,
-		reversed:   true,
-		hideBroken: true,
+		order:        g.StationsOrderClickCount,
+		by:           g.StationsByCountryCodeExact,
+		term:         countryCode,
+		reversed:     true,
+		hideBroken:   true,
+		currentChunk: 0,
+		chunkSize:    50,
 	}
 }
 
 func allStationSource() source {
 	return source{
-		order:      g.StationsOrderClickCount,
-		reversed:   true,
-		hideBroken: true,
+		order:        g.StationsOrderClickCount,
+		reversed:     true,
+		hideBroken:   true,
+		currentChunk: 0,
+		chunkSize:    50,
 	}
+}
+
+func (s *source) incrementChunk() {
+	s.currentChunk += 1
 }

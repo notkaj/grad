@@ -13,7 +13,8 @@ import (
 type Model struct {
 	width, height int
 	list          list.Model
-	Source        source
+	source        source
+	fetching      bool
 }
 
 func (m *Model) updateListProperties() {
@@ -30,6 +31,7 @@ func (m *Model) Init() tea.Cmd {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
 		s.LightDark = lipgloss.LightDark(msg.IsDark())
@@ -43,13 +45,21 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case sel.PopulatedMsg:
 		m.list.StopSpinner()
+		m.fetching = false
+		m.source.incrementChunk()
+		return m, m.list.SetItems(append(m.list.Items(), msg...))
 	}
 
 	// This will also call our delegate's update function.
 	newListModel, cmd := m.list.Update(msg)
+	cmds = append(cmds, cmd)
 	m.list = newListModel
+	if m.list.Paginator.OnLastPage() && !m.fetching && !m.IsFiltering() {
+		m.fetching = true
+		cmds = append(cmds, m.Populate())
+	}
 
-	return m, cmd
+	return m, tea.Batch(cmds...)
 }
 
 func (m *Model) View() tea.View {
@@ -65,23 +75,27 @@ func (m *Model) ID() string {
 }
 
 func (m *Model) Populate() tea.Cmd {
+	m.fetching = true
 	return tea.Batch(
 		m.list.StartSpinner(),
 		func() tea.Msg {
-			m.list.SetItems(m.Source.items())
-			return sel.PopulatedMsg("Stations Populated")
+			// m.list.SetItems(append(m.list.Items(), m.Source.items()...))
+			return sel.PopulatedMsg(m.source.items())
 		},
 	)
 }
 
 func (m *Model) Select(msg sel.Msg) {
+	m.source.currentChunk = 0
+	var items []list.Item
+	m.list.SetItems(items)
 	switch msg := msg.(type) {
 	case sel.CountryCodeMsg:
 		code := string(msg)
 		if code == "ALL" {
-			m.Source = allStationSource()
+			m.source = allStationSource()
 		} else {
-			m.Source = stationsByCountryCodeSource(code)
+			m.source = stationsByCountryCodeSource(code)
 		}
 	}
 }
@@ -101,6 +115,7 @@ func InitialModel() Model {
 	stationsList.Styles.Title = s.Styles.Title
 
 	m.list = stationsList
+	m.fetching = false
 	m.list.SetSpinner(spinner.Line)
 
 	return m

@@ -50,6 +50,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case sel.PopulatedMsg:
+		m.list.SetItems(msg)
 		m.list.StopSpinner()
 	}
 
@@ -77,8 +78,8 @@ func (m *Model) Populate() tea.Cmd {
 	return tea.Batch(
 		m.list.StartSpinner(),
 		func() tea.Msg {
-			m.list.SetItems(m.source.items())
-			return sel.PopulatedMsg("Countries Populated")
+			// m.list.SetItems(m.source.items())
+			return sel.PopulatedMsg(m.source.items())
 		},
 	)
 }
