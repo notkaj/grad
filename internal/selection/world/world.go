@@ -76,10 +76,13 @@ func (m *Model) ID() string {
 }
 
 func (m *Model) Populate() tea.Cmd {
-	return func() tea.Msg {
-		m.list.SetItems(m.source.items())
-		return sel.PopulatedMsg("Countries Populated")
-	}
+	return tea.Batch(
+		m.list.StartSpinner(),
+		func() tea.Msg {
+			m.list.SetItems(m.source.items())
+			return sel.PopulatedMsg("Countries Populated")
+		},
+	)
 }
 
 func (m *Model) Select(msg sel.Msg) {
@@ -98,7 +101,7 @@ func InitialModel() Model {
 	countryList.Styles.Title = s.Styles.Title
 
 	m.list = countryList
-	m.list.SetSpinner(spinner.Dot)
+	m.list.SetSpinner(spinner.Line)
 
 	return m
 }

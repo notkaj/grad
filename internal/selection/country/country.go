@@ -38,11 +38,13 @@ func (m Model) ID() string {
 }
 
 func (m Model) Populate() tea.Cmd {
-	m.list.StartSpinner()
-	return func() tea.Msg {
-		m.list.SetItems(m.Source.items())
-		return sel.PopulatedMsg("Stations Populated")
-	}
+	return tea.Batch(
+		m.list.StartSpinner(),
+		func() tea.Msg {
+			m.list.SetItems(m.Source.items())
+			return sel.PopulatedMsg("Stations Populated")
+		},
+	)
 }
 
 func (m *Model) Select(msg sel.Msg) {
