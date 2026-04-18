@@ -43,7 +43,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, Keys.Select):
 			switch t := m.screen.(type) {
 			case *w.Model:
-				id, size := t.Info()
+				id, size := t.SelectionInfo()
 				m.country.Select(sel.CountrySelectedMsg{Code: id, Count: size})
 				m.screen = m.country
 				return m, m.screen.Populate()

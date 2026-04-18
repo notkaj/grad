@@ -70,7 +70,7 @@ func (m *Model) View() tea.View {
 	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
-func (m *Model) ID() string {
+func (m Model) Info() string {
 	i, ok := m.list.SelectedItem().(item)
 	if ok {
 		return i.ID
