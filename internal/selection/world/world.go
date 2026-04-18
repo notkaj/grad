@@ -94,7 +94,7 @@ func InitialModel() Model {
 	// Setup list.
 	delegate := newItemDelegate()
 	countryList := list.New(nil, delegate, 0, 0)
-	countryList.Title = "Country"
+	countryList.Title = "Countries"
 	countryList.Styles.Title = s.Styles.Title
 
 	m.list = countryList
