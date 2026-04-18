@@ -34,6 +34,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// return m, nil
 		m.world.Update(msg)
 		m.country.Update(msg)
+		return m, nil
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
 			break
