@@ -48,7 +48,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() tea.View {
-	return tea.NewView("not yet implemented")
+	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
 func (m Model) ID() string {

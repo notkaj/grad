@@ -62,9 +62,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() tea.View {
-	v := tea.NewView(s.Styles.App.Render(m.list.View()))
-	v.AltScreen = true
-	return v
+	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
 func (m *Model) ID() string {

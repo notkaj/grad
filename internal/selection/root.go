@@ -38,7 +38,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() tea.View {
-	return m.screen.View()
+	v := m.screen.View()
+	v.AltScreen = true
+	return v
 }
 
 func InitialModel() *Model {
