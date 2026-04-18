@@ -86,6 +86,10 @@ func (m *Model) Populate() tea.Cmd {
 func (m *Model) Select(msg sel.Msg) {
 }
 
+func (m *Model) IsFiltering() bool {
+	return m.list.FilterState() == list.Filtering
+}
+
 func InitialModel() Model {
 	// Initialize the model and list.
 	m := Model{}

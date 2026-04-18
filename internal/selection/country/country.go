@@ -81,6 +81,10 @@ func (m *Model) Select(msg sel.Msg) {
 	}
 }
 
+func (m *Model) IsFiltering() bool {
+	return m.list.FilterState() == list.Filtering
+}
+
 func InitialModel() Model {
 	return Model{
 		list: list.Model{},

@@ -8,6 +8,7 @@ type Selector interface {
 	ID() string
 	Populate() tea.Cmd
 	Select(Msg)
+	IsFiltering() bool
 }
 
 type PopulatedMsg string
