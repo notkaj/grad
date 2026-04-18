@@ -21,12 +21,13 @@ func (c source) items() []list.Item {
 	items := make([]list.Item, len+1)
 	sum := 0
 	for i, country := range countries {
-		desc := fmt.Sprintf("Station %d", country.StationCount)
+		desc := fmt.Sprintf("%d Stations", country.StationCount)
 		items[i+1] = sel.NewItem(country.Name, desc, country.Code)
 		sum += country.StationCount
 	}
 
-	items[0] = sel.AllItem
+	allItem := sel.AllItem(sum)
+	items[0] = allItem
 	if c.includeAcc {
 		return items
 	}
