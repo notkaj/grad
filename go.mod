@@ -6,6 +6,7 @@ require (
 	charm.land/bubbles/v2 v2.1.0
 	charm.land/bubbletea/v2 v2.0.2
 	charm.land/lipgloss/v2 v2.0.2
+	github.com/charmbracelet/x/exp/charmtone v0.0.0-20260413165052-6921c759c913
 	gitlab.com/AgentNemo/goradios v0.0.0-20210218201446-d20f1eeff610
 )
 

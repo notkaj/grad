@@ -111,6 +111,10 @@ func (m *Model) IsFiltering() bool {
 	return m.list.FilterState() == list.Filtering
 }
 
+func (m *Model) ViewLayer() *lipgloss.Layer {
+	return lipgloss.NewLayer(s.Styles.App.Render(m.list.View()))
+}
+
 func InitialModel() Model {
 	m := Model{}
 	s.LightDark = lipgloss.LightDark(true)

@@ -4,6 +4,7 @@ package selector
 import (
 	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 type Selector interface {
@@ -11,6 +12,7 @@ type Selector interface {
 	Populate() tea.Cmd
 	Select(Msg)
 	IsFiltering() bool
+	ViewLayer() *lipgloss.Layer
 }
 
 type PopulatedMsg []list.Item

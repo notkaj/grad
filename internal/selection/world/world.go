@@ -91,6 +91,10 @@ func (m *Model) IsFiltering() bool {
 	return m.list.FilterState() == list.Filtering
 }
 
+func (m *Model) ViewLayer() *lipgloss.Layer {
+	return lipgloss.NewLayer(s.Styles.App.Render(m.list.View()))
+}
+
 func InitialModel() Model {
 	// Initialize the model and list.
 	m := Model{}

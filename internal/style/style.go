@@ -16,7 +16,7 @@ var (
 			NewStyle().
 			Padding(1, 2).
 			Margin(1).
-			BorderStyle(lipgloss.NormalBorder()).
+			BorderStyle(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("#c4068b")),
 		Title: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFDF5")).

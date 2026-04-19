@@ -4,6 +4,8 @@ package selection
 import (
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/exp/charmtone"
 	c "github.com/notkaj/grad/internal/selection/country"
 	sel "github.com/notkaj/grad/internal/selection/selector"
 	w "github.com/notkaj/grad/internal/selection/world"
@@ -61,9 +63,24 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() tea.View {
-	v := m.screen.View()
-	v.AltScreen = true
-	return v
+	backdrop := m.screen.ViewLayer()
+	card := lipgloss.NewLayer(
+		lipgloss.NewStyle().
+			Width(40).
+			Height(20).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(charmtone.Damson).
+			Align(lipgloss.Center, lipgloss.Center).
+			Render("Test"),
+	)
+	comp := lipgloss.NewCompositor(
+		backdrop,
+		card.X(50).Y(20),
+	)
+	var view tea.View
+	view.SetContent(comp.Render())
+	view.AltScreen = true
+	return view
 }
 
 func InitialModel() *Model {
