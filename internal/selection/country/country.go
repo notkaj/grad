@@ -150,8 +150,10 @@ func (m *Model) Select(msg sel.Msg) {
 	case sel.CountrySelectedMsg:
 		m.list.Title = msg.Name
 		if msg.Code == "ALL" {
+			m.list.SetFilteringEnabled(true)
 			m.source = allStationSource()
 		} else {
+			m.list.SetFilteringEnabled(false)
 			m.source = stationsByCountryCodeSource(msg.Code)
 		}
 		m.baseSource = m.source
