@@ -31,5 +31,5 @@ func (m PlaybackModel) Layer(width, height int) *lipgloss.Layer {
 			BorderForeground(charmtone.Damson).
 			Align(lipgloss.Center, lipgloss.Center).
 			Render(content),
-	).X(width/2 - cardWidth/2).Y(height/2 - cardHeight/2)
+	).X(width / 2).Y(height/2 - cardHeight/2)
 }
