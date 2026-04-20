@@ -119,6 +119,8 @@ func InitialModel() Model {
 
 	// Setup list.
 	delegate := newItemDelegate()
+	delegate.Styles.SelectedTitle = s.Styles.SeletectedTitle
+	delegate.Styles.SelectedDesc = s.Styles.SelectedDesc
 	stationsList := list.New(nil, delegate, 0, 0)
 	stationsList.Title = "Stations"
 	stationsList.Styles.Title = s.Styles.Title
