@@ -18,7 +18,7 @@ import (
 type Player struct {
 	URL        string
 	mixer      *beep.Mixer
-	current    beep.StreamCloser
+	current    io.Closer
 	sampleRate beep.SampleRate
 }
 
@@ -46,17 +46,20 @@ func (p *Player) Play(url string) tea.Cmd {
 			format   beep.Format
 		)
 
-		// Select decoder based on Content-Type
-		if strings.Contains(contentType, "ogg") || strings.Contains(contentType, "vorbis") {
+		isOgg := strings.Contains(contentType, "ogg") || strings.Contains(contentType, "vorbis")
+		isMp3 := strings.Contains(contentType, "mpeg")
+
+		if isOgg {
 			streamer, format, err = vorbis.Decode(res.Body)
-		} else {
-			// Default to MP3 for mpeg or unknown types
+		} else if isMp3 {
 			streamer, format, err = mp3.Decode(res.Body)
 		}
 
-		if err != nil {
+		// If it's a known format but decode failed, or it's an unknown format (AAC, HLS, etc.)
+		// we fallback to FFmpeg.
+		if err != nil || (!isOgg && !isMp3) {
 			res.Body.Close()
-			return PlayerErrorMsg(fmt.Sprintf("decode error (%s): %v", contentType, err))
+			return p.playWithFFmpeg(url)
 		}
 
 		resampled := beep.Resample(4, format.SampleRate, p.sampleRate, streamer)
@@ -67,8 +70,22 @@ func (p *Player) Play(url string) tea.Cmd {
 		p.mixer.Add(wrapped)
 		speaker.Unlock()
 
-		return PlayerStartedMsg("Player Playing")
+		return PlayerStartedMsg(fmt.Sprintf("Playing %s", contentType))
 	}
+}
+
+func (p *Player) playWithFFmpeg(url string) tea.Msg {
+	s, err := newFFmpegStreamer(url, p.sampleRate)
+	if err != nil {
+		return PlayerErrorMsg("ffmpeg error: " + err.Error())
+	}
+
+	speaker.Lock()
+	p.current = s
+	p.mixer.Add(s)
+	speaker.Unlock()
+
+	return PlayerStartedMsg("Playing via FFmpeg (fallback)")
 }
 
 func (p *Player) Stop() {
