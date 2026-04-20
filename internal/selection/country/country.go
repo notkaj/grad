@@ -63,7 +63,7 @@ func (m *Model) View() tea.View {
 func (m Model) Info() string {
 	i, ok := m.list.SelectedItem().(item)
 	if ok {
-		return i.ID
+		return i.id
 	}
 	// TODO: should probably throw an error or something
 	return ""
@@ -103,6 +103,13 @@ func (m *Model) IsFiltering() bool {
 
 func (m *Model) ViewLayer() *lipgloss.Layer {
 	return lipgloss.NewLayer(s.Styles.App.Render(m.list.View()))
+}
+
+func (m *Model) SelectionInfo() (string, string) {
+	if i, ok := m.list.SelectedItem().(item); ok {
+		return i.title, i.url
+	}
+	return "", ""
 }
 
 func InitialModel() Model {

@@ -37,7 +37,7 @@ func (s source) items() []list.Item {
 		// } else {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
-		items[i] = NewItem(station.Name, builder.String(), station.StationUUID)
+		items[i] = NewItem(station.Name, builder.String(), station.StationUUID, station.URLResolved)
 	}
 	return items
 }

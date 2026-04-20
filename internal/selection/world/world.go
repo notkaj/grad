@@ -56,7 +56,7 @@ func (m *Model) View() tea.View {
 func (m *Model) SelectionInfo() (string, int) {
 	i, ok := m.list.SelectedItem().(item)
 	if ok {
-		return i.ID, i.Count
+		return i.id, i.stationCount
 	}
 	return "", 0
 }
