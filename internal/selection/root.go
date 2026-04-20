@@ -18,6 +18,8 @@ type Model struct {
 	country       *c.Model
 	screen        sel.Selector
 	player        *playback.Player
+	status        string
+	stationName   string
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -26,6 +28,12 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case playback.PlayerStartedMsg:
+		m.status = string(msg)
+		return m, nil
+	case playback.PlayerErrorMsg:
+		m.status = "Error: " + string(msg)
+		return m, nil
 	case tea.BackgroundColorMsg:
 		m.country.Update(msg)
 		m.world.Update(msg)
@@ -47,7 +55,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.country.Select(sel.CountrySelectedMsg{Code: id, Count: size})
 				m.screen = m.country
 				return m, m.screen.Populate()
+			case *c.Model:
+				name, url := t.SelectionInfo()
+				m.stationName = name
+				m.status = "Loading..."
+				return m, m.player.Play(url)
 			}
+
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
 			case *c.Model:
