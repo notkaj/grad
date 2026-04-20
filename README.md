@@ -4,6 +4,12 @@ Global Radio
 
 Browse radio stations of the world, right in your terminal.
 
+## Roadmap:
+ - Search stations
+ - Favorite stations
+ - Sort  by clicks, votes, alphabetically..
+ - Sensible key hints
+
 Powered by [Radio Browser](https://www.radio-browser.info/)
 
 
