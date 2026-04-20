@@ -5,7 +5,7 @@ import (
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/charmbracelet/x/exp/charmtone"
+	"github.com/notkaj/grad/internal/card"
 	"github.com/notkaj/grad/internal/playback"
 	c "github.com/notkaj/grad/internal/selection/country"
 	sel "github.com/notkaj/grad/internal/selection/selector"
@@ -18,8 +18,7 @@ type Model struct {
 	country       *c.Model
 	screen        sel.Selector
 	player        *playback.Player
-	status        string
-	stationName   string
+	playbackCard  card.PlaybackModel
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -29,10 +28,10 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case playback.PlayerStartedMsg:
-		m.status = string(msg)
+		m.playbackCard.Status = string(msg)
 		return m, nil
 	case playback.PlayerErrorMsg:
-		m.status = "Error: " + string(msg)
+		m.playbackCard.Status = "Error: " + string(msg)
 		return m, nil
 	case tea.BackgroundColorMsg:
 		m.country.Update(msg)
@@ -57,8 +56,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.screen.Populate()
 			case *c.Model:
 				name, url := t.SelectionInfo()
-				m.stationName = name
-				m.status = "Loading..."
+				m.playbackCard.StationName = name
+				m.playbackCard.Status = "Loading..."
 				return m, m.player.Play(url)
 			}
 
@@ -85,31 +84,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) View() tea.View {
 	backdrop := m.screen.ViewLayer()
-
-	content := m.stationName
-	if m.status != "" {
-		content += "\n\n" + m.status
-	}
-	if content == "" {
-		content = "No station selected"
-	}
-
-	cardWidth := 40
-	cardHeight := 20
-
-	card := lipgloss.NewLayer(
-		lipgloss.NewStyle().
-			Width(cardWidth).
-			Height(cardHeight).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(charmtone.Damson).
-			Align(lipgloss.Center, lipgloss.Center).
-			Render(content),
-	).X(m.width/2 - cardWidth/2).Y(m.height/2 - cardHeight/2)
+	playbackLayer := m.playbackCard.Layer(m.width, m.height)
 
 	comp := lipgloss.NewCompositor(
 		backdrop,
-		card,
+		playbackLayer,
 	)
 	var view tea.View
 	view.SetContent(comp.Render())
