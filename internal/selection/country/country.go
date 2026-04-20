@@ -25,7 +25,7 @@ type Model struct {
 	baseSource source
 	baseTitle  string
 	fetching   bool
-	totalCount int
+	reachedEnd bool
 	inSearch   bool
 	searchSeq  int
 }
@@ -50,6 +50,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case sel.PopulatedMsg:
 		m.list.StopSpinner()
 		m.fetching = false
+		m.reachedEnd = len(msg) < int(m.source.chunkSize)
 		m.source.incrementChunk()
 		return m, m.list.SetItems(append(m.list.Items(), msg...))
 
@@ -78,8 +79,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.inSearch = false
 		m.source = m.baseSource
 		m.source.currentChunk = 0
+		m.reachedEnd = false
 		m.list.Title = m.baseTitle
-		m.totalCount = 0
 		m.fetching = false
 		var empty []list.Item
 		m.list.SetItems(empty)
@@ -99,8 +100,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case !m.inSearch &&
 		m.list.Paginator.OnLastPage() &&
 		!m.fetching &&
-		!m.IsFiltering() &&
-		len(m.list.Items()) < m.totalCount:
+		!m.reachedEnd &&
+		!m.IsFiltering():
 		m.fetching = true
 		cmds = append(cmds, m.Populate())
 	}
@@ -110,8 +111,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func searchFetch(term string) tea.Cmd {
 	return func() tea.Msg {
-		source := searchSource(term)
-		return searchResultMsg(source.items())
+		src := searchSource(term)
+		return searchResultMsg(src.items())
 	}
 }
 
@@ -140,20 +141,18 @@ func (m *Model) Populate() tea.Cmd {
 func (m *Model) Select(msg sel.Msg) {
 	m.source.currentChunk = 0
 	m.inSearch = false
+	m.reachedEnd = false
 	m.searchSeq++
 	m.list.ResetFilter()
 	var items []list.Item
 	m.list.SetItems(items)
 	switch msg := msg.(type) {
 	case sel.CountrySelectedMsg:
-		code := msg.Code
-		size := msg.Count
-		m.totalCount = size
 		m.list.Title = msg.Name
-		if code == "ALL" {
+		if msg.Code == "ALL" {
 			m.source = allStationSource()
 		} else {
-			m.source = stationsByCountryCodeSource(code)
+			m.source = stationsByCountryCodeSource(msg.Code)
 		}
 		m.baseSource = m.source
 		m.baseTitle = m.list.Title

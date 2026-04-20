@@ -53,12 +53,12 @@ func (m *Model) View() tea.View {
 	return tea.NewView(s.Styles.App.Render(m.list.View()))
 }
 
-func (m *Model) SelectionInfo() (string, string, int) {
+func (m *Model) SelectionInfo() (string, string) {
 	i, ok := m.list.SelectedItem().(item)
 	if ok {
-		return i.id, i.title, i.stationCount
+		return i.id, i.title
 	}
-	return "", "", 0
+	return "", ""
 }
 
 func (m *Model) Populate() tea.Cmd {
