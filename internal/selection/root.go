@@ -68,10 +68,11 @@ func (m *Model) View() tea.View {
 			BorderForeground(charmtone.Damson).
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Test"),
-	)
+	).X(50).Y(20)
+
 	comp := lipgloss.NewCompositor(
 		backdrop,
-		card.X(50).Y(20),
+		card,
 	)
 	var view tea.View
 	view.SetContent(comp.Render())
