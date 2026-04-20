@@ -2,7 +2,6 @@ package country
 
 import (
 	"fmt"
-	"strings"
 
 	"charm.land/bubbles/v2/list"
 	g "gitlab.com/AgentNemo/goradios"
@@ -29,15 +28,16 @@ func (s source) items() []list.Item {
 	len := len(stations)
 	items := make([]list.Item, len)
 	for i, station := range stations {
-		var builder strings.Builder
-		fmt.Fprintf(&builder, "%d clicks, ", station.ClickCount)
-		fmt.Fprintf(&builder, "last okay check at %s", station.LastCheckOkTime)
+		// var builder strings.Builder
+		// fmt.Fprintf(&builder, "%d clicks, ", station.ClickCount)
+		// fmt.Fprintf(&builder, "last okay check at %s", station.LastCheckOkTime)
 		// if station.LastCheckOk {
 		// 	fmt.Fprintf(&builder, "last check OK at %s", station.LastCheckOkTime)
 		// } else {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
-		items[i] = NewItem(station.Name, builder.String(), station.StationUUID, station.URLResolved)
+		desc := fmt.Sprintf("%d clicks", station.ClickCount)
+		items[i] = NewItem(station.Name, desc, station.StationUUID, station.URLResolved)
 	}
 	return items
 }
