@@ -52,7 +52,6 @@ func (p *Player) Play(url string) tea.Cmd {
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			// If we cancelled, don't return an error message to the UI
 			if ctx.Err() != nil {
 				return nil
 			}
@@ -71,46 +70,56 @@ func (p *Player) Play(url string) tea.Cmd {
 		isAAC := strings.Contains(contentType, "aac") || strings.Contains(contentType, "m4a")
 		isHLS := strings.Contains(contentType, "mpegurl") || strings.Contains(contentType, "apple.mpegurl")
 
-		// Route to native decoders if possible
 		if isOgg {
 			streamer, format, err = vorbis.Decode(res.Body)
 		} else if isMp3 {
 			streamer, format, err = mp3.Decode(res.Body)
 		} else if isFlac {
 			streamer, format, err = flac.Decode(res.Body)
+		} else if isAAC {
+			nativeStreamer, nErr := newNativeAACStreamer(res.Body)
+			if nErr == nil {
+				resampled := beep.Resample(4, nativeStreamer.format.SampleRate, p.sampleRate, nativeStreamer)
+				if p.setupPlayer(ctx, resampled, nativeStreamer) {
+					return PlayerStartedMsg(fmt.Sprintf("Playing %s (native)", contentType))
+				}
+				return nil
+			}
 		}
 
-		// If it's a known FFmpeg-only format, or native decoding failed, fallback.
-		if isAAC || isHLS || (err != nil && (isOgg || isMp3 || isFlac)) {
+		if isHLS || (err != nil && (isOgg || isMp3 || isFlac)) || (isAAC && streamer == nil) {
 			res.Body.Close()
 			return p.playWithFFmpeg(ctx, url)
 		}
 
-		// If we still don't have a streamer and it wasn't a known codec,
-		// we can try one last greedy attempt with FFmpeg.
 		if streamer == nil {
 			res.Body.Close()
 			return p.playWithFFmpeg(ctx, url)
 		}
 
 		resampled := beep.Resample(4, format.SampleRate, p.sampleRate, streamer)
-		wrapped := &closeWrapper{Streamer: resampled, closer: streamer}
-
-		p.mu.Lock()
-		defer p.mu.Unlock()
-		// Check if we were cancelled while loading
-		if ctx.Err() != nil {
-			wrapped.Close()
-			return nil
+		if p.setupPlayer(ctx, resampled, streamer) {
+			return PlayerStartedMsg(fmt.Sprintf("Playing %s", contentType))
 		}
-
-		speaker.Lock()
-		p.current = wrapped
-		p.mixer.Add(wrapped)
-		speaker.Unlock()
-
-		return PlayerStartedMsg(fmt.Sprintf("Playing %s", contentType))
+		return nil
 	}
+}
+
+func (p *Player) setupPlayer(ctx context.Context, streamer beep.Streamer, closer io.Closer) bool {
+	wrapped := &closeWrapper{Streamer: streamer, closer: closer}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if ctx.Err() != nil {
+		wrapped.Close()
+		return false
+	}
+
+	speaker.Lock()
+	p.current = wrapped
+	p.mixer.Add(wrapped)
+	speaker.Unlock()
+	return true
 }
 
 func (p *Player) playWithFFmpeg(ctx context.Context, url string) tea.Msg {

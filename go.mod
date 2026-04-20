@@ -8,6 +8,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.2
 	github.com/charmbracelet/x/exp/charmtone v0.0.0-20260413165052-6921c759c913
 	github.com/gopxl/beep v1.4.1
+	github.com/llehouerou/go-aac v0.0.0-20260119142340-5f2857eb82ad
 	gitlab.com/AgentNemo/goradios v0.0.0-20210218201446-d20f1eeff610
 )
 
