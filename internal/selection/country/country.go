@@ -89,6 +89,7 @@ func (m *Model) Select(msg sel.Msg) {
 		code := msg.Code
 		size := msg.Count
 		m.totalCount = size
+		m.list.Title = msg.Name
 		if code == "ALL" {
 			m.source = allStationSource()
 		} else {

@@ -21,5 +21,6 @@ type Msg any
 
 type CountrySelectedMsg struct {
 	Code  string
+	Name  string
 	Count int
 }
