@@ -140,6 +140,8 @@ func (m *Model) Populate() tea.Cmd {
 func (m *Model) Select(msg sel.Msg) {
 	m.source.currentChunk = 0
 	m.inSearch = false
+	m.searchSeq++
+	m.list.ResetFilter()
 	var items []list.Item
 	m.list.SetItems(items)
 	switch msg := msg.(type) {
