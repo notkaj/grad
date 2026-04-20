@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/x/exp/charmtone v0.0.0-20260413165052-6921c759c913
 	github.com/gopxl/beep v1.4.1
 	github.com/llehouerou/go-aac v0.0.0-20260119142340-5f2857eb82ad
-	gitlab.com/AgentNemo/goradios v0.0.0-20210218201446-d20f1eeff610
+	gitlab.com/notkaj/goradios v0.0.0-20260420222442-bbf7ed441525
 )
 
 require (
@@ -40,5 +40,3 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 )
-
-replace gitlab.com/AgentNemo/goradios => /home/kaj/repos/goradios/

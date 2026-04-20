@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"charm.land/bubbles/v2/list"
-	g "gitlab.com/AgentNemo/goradios"
+	g "gitlab.com/notkaj/goradios"
 )
 
 type source struct {
