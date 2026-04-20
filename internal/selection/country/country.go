@@ -2,6 +2,8 @@
 package country
 
 import (
+	"time"
+
 	"charm.land/bubbles/v2/list"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
@@ -10,11 +12,22 @@ import (
 	s "github.com/notkaj/grad/internal/style"
 )
 
+type searchDebounceMsg struct {
+	term string
+	seq  int
+}
+
+type searchResultMsg []list.Item
+
 type Model struct {
 	list       list.Model
 	source     source
+	baseSource source
+	baseTitle  string
 	fetching   bool
 	totalCount int
+	inSearch   bool
+	searchSeq  int
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -39,21 +52,67 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fetching = false
 		m.source.incrementChunk()
 		return m, m.list.SetItems(append(m.list.Items(), msg...))
+
+	case searchDebounceMsg:
+		if msg.seq == m.searchSeq && msg.term != "" {
+			cmds = append(cmds, m.list.StartSpinner(), searchFetch(msg.term))
+		}
+		return m, tea.Batch(cmds...)
+
+	case searchResultMsg:
+		m.list.StopSpinner()
+		return m, m.list.SetItems([]list.Item(msg))
 	}
 
-	// This will also call our delegate's update function.
+	prevTerm := m.list.FilterInput.Value()
+
 	newListModel, cmd := m.list.Update(msg)
 	cmds = append(cmds, cmd)
 	m.list = newListModel
-	if m.list.Paginator.OnLastPage() &&
+
+	newTerm := m.list.FilterInput.Value()
+	newState := m.list.FilterState()
+
+	switch {
+	case m.inSearch && (newState == list.Unfiltered || newTerm == ""):
+		m.inSearch = false
+		m.source = m.baseSource
+		m.source.currentChunk = 0
+		m.list.Title = m.baseTitle
+		m.totalCount = 0
+		m.fetching = false
+		var empty []list.Item
+		m.list.SetItems(empty)
+		cmds = append(cmds, m.Populate())
+
+	case newTerm != prevTerm && newTerm != "":
+		if !m.inSearch {
+			m.inSearch = true
+		}
+		m.searchSeq++
+		seq := m.searchSeq
+		term := newTerm
+		cmds = append(cmds, tea.Tick(300*time.Millisecond, func(time.Time) tea.Msg {
+			return searchDebounceMsg{term: term, seq: seq}
+		}))
+
+	case !m.inSearch &&
+		m.list.Paginator.OnLastPage() &&
 		!m.fetching &&
 		!m.IsFiltering() &&
-		len(m.list.Items()) < m.totalCount {
+		len(m.list.Items()) < m.totalCount:
 		m.fetching = true
 		cmds = append(cmds, m.Populate())
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func searchFetch(term string) tea.Cmd {
+	return func() tea.Msg {
+		source := searchSource(term)
+		return searchResultMsg(source.items())
+	}
 }
 
 func (m *Model) View() tea.View {
@@ -65,7 +124,6 @@ func (m Model) Info() string {
 	if ok {
 		return i.id
 	}
-	// TODO: should probably throw an error or something
 	return ""
 }
 
@@ -74,7 +132,6 @@ func (m *Model) Populate() tea.Cmd {
 	return tea.Batch(
 		m.list.StartSpinner(),
 		func() tea.Msg {
-			// m.list.SetItems(append(m.list.Items(), m.Source.items()...))
 			return sel.PopulatedMsg(m.source.items())
 		},
 	)
@@ -82,6 +139,7 @@ func (m *Model) Populate() tea.Cmd {
 
 func (m *Model) Select(msg sel.Msg) {
 	m.source.currentChunk = 0
+	m.inSearch = false
 	var items []list.Item
 	m.list.SetItems(items)
 	switch msg := msg.(type) {
@@ -95,6 +153,8 @@ func (m *Model) Select(msg sel.Msg) {
 		} else {
 			m.source = stationsByCountryCodeSource(code)
 		}
+		m.baseSource = m.source
+		m.baseTitle = m.list.Title
 	}
 }
 
@@ -117,13 +177,19 @@ func InitialModel() Model {
 	m := Model{}
 	s.LightDark = lipgloss.LightDark(true)
 
-	// Setup list.
 	delegate := newItemDelegate()
 	delegate.Styles.SelectedTitle = s.Styles.SeletectedTitle
 	delegate.Styles.SelectedDesc = s.Styles.SelectedDesc
 	stationsList := list.New(nil, delegate, 0, 0)
 	stationsList.Title = "Stations"
 	stationsList.Styles.Title = s.Styles.Title
+	stationsList.Filter = func(_ string, targets []string) []list.Rank {
+		ranks := make([]list.Rank, len(targets))
+		for i := range targets {
+			ranks[i] = list.Rank{Index: i}
+		}
+		return ranks
+	}
 
 	m.list = stationsList
 	m.fetching = false

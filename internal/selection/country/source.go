@@ -57,6 +57,18 @@ func stationsByCountryCodeSource(countryCode string) source {
 	}
 }
 
+func searchSource(term string) source {
+	return source{
+		order:        g.StationsOrderClickCount,
+		by:           g.StationsByName,
+		term:         term,
+		reversed:     true,
+		hideBroken:   true,
+		currentChunk: 0,
+		chunkSize:    50,
+	}
+}
+
 func allStationSource() source {
 	return source{
 		order:        g.StationsOrderClickCount,
