@@ -5,17 +5,19 @@ type item struct {
 	description string
 	id          string
 	url         string
+	codec       string
 }
 
 func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.description }
 func (i item) FilterValue() string { return i.title }
 
-func NewItem(title string, desc string, id string, url string) item {
+func NewItem(title string, desc string, id string, url string, codec string) item {
 	return item{
 		title:       title,
 		description: desc,
 		id:          id,
 		url:         url,
+		codec:       codec,
 	}
 }

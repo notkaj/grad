@@ -106,11 +106,11 @@ func (m *Model) ViewLayer() *lipgloss.Layer {
 	return lipgloss.NewLayer(s.Styles.App.Render(m.list.View()))
 }
 
-func (m *Model) SelectionInfo() (string, string) {
+func (m *Model) SelectionInfo() (string, string, string) {
 	if i, ok := m.list.SelectedItem().(item); ok {
-		return i.title, i.url
+		return i.title, i.url, i.codec
 	}
-	return "", ""
+	return "", "", ""
 }
 
 func InitialModel() Model {

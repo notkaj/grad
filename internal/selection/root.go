@@ -55,8 +55,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.screen = m.country
 				return m, m.screen.Populate()
 			case *c.Model:
-				name, url := t.SelectionInfo()
+				name, url, codec := t.SelectionInfo()
 				m.playbackCard.StationName = name
+				m.playbackCard.Codec = codec
 				m.playbackCard.Status = "Loading..."
 				return m, m.player.Play(url)
 			}

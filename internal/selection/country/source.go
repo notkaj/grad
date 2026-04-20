@@ -36,8 +36,8 @@ func (s source) items() []list.Item {
 		// } else {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
-		desc := fmt.Sprintf("%d clicks", station.ClickCount)
-		items[i] = NewItem(station.Name, desc, station.StationUUID, station.URLResolved)
+		desc := fmt.Sprintf("%s, %d clicks", station.Codec, station.ClickCount)
+		items[i] = NewItem(station.Name, desc, station.StationUUID, station.URLResolved, station.Codec)
 	}
 	return items
 }

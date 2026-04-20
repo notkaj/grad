@@ -8,11 +8,15 @@ import (
 
 type PlaybackModel struct {
 	StationName string
+	Codec       string
 	Status      string
 }
 
 func (m PlaybackModel) Layer(width, height int) *lipgloss.Layer {
 	content := m.StationName
+	if m.Codec != "" {
+		content += "\n" + m.Codec
+	}
 	if m.Status != "" {
 		content += "\n\n" + m.Status
 	}
