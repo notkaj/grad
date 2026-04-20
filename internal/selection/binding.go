@@ -3,9 +3,10 @@ package selection
 import "charm.land/bubbles/v2/key"
 
 type KeyMap struct {
-	Select    key.Binding
-	Quickview key.Binding
-	Back      key.Binding
+	Select         key.Binding
+	Quickview      key.Binding
+	Back           key.Binding
+	TogglePlayback key.Binding
 }
 
 var Keys = KeyMap{
@@ -20,5 +21,9 @@ var Keys = KeyMap{
 	Back: key.NewBinding(
 		key.WithKeys("backspace"),
 		key.WithHelp("backspace", "back"),
+	),
+	TogglePlayback: key.NewBinding(
+		key.WithKeys("space"),
+		key.WithHelp("space", "toggle playback"),
 	),
 }

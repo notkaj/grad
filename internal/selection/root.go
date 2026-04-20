@@ -6,6 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/exp/charmtone"
+	"github.com/notkaj/grad/internal/playback"
 	c "github.com/notkaj/grad/internal/selection/country"
 	sel "github.com/notkaj/grad/internal/selection/selector"
 	w "github.com/notkaj/grad/internal/selection/world"
@@ -16,6 +17,7 @@ type Model struct {
 	world         *w.Model
 	country       *c.Model
 	screen        sel.Selector
+	player        *playback.Player
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -52,6 +54,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.screen = m.world
 				return m, nil
 			}
+		case key.Matches(msg, Keys.TogglePlayback):
+			if m.player == nil {
+				return m, nil
+			}
+			if m.player.IsPlaying() {
+				m.player.Stop()
+			} else {
+				return m, m.player.Play(m.player.URL)
+			}
 		}
 	}
 	_, cmd := m.screen.Update(msg)
@@ -87,5 +98,6 @@ func InitialModel() *Model {
 		world:   &worldModel,
 		country: &countryModel,
 		screen:  &worldModel,
+		player:  playback.NewPlayer(),
 	}
 }
