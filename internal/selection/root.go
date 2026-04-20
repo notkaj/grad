@@ -85,15 +85,27 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) View() tea.View {
 	backdrop := m.screen.ViewLayer()
+
+	content := m.stationName
+	if m.status != "" {
+		content += "\n\n" + m.status
+	}
+	if content == "" {
+		content = "No station selected"
+	}
+
+	cardWidth := 40
+	cardHeight := 20
+
 	card := lipgloss.NewLayer(
 		lipgloss.NewStyle().
-			Width(40).
-			Height(20).
+			Width(cardWidth).
+			Height(cardHeight).
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(charmtone.Damson).
 			Align(lipgloss.Center, lipgloss.Center).
-			Render("Test"),
-	).X(50).Y(20)
+			Render(content),
+	).X(m.width/2 - cardWidth/2).Y(m.height/2 - cardHeight/2)
 
 	comp := lipgloss.NewCompositor(
 		backdrop,
