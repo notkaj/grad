@@ -12,9 +12,10 @@ import (
 )
 
 type Model struct {
-	world   *w.Model
-	country *c.Model
-	screen  sel.Selector
+	width, height int
+	world         *w.Model
+	country       *c.Model
+	screen        sel.Selector
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -24,16 +25,11 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
-		// s.LightDark = lipgloss.LightDark(msg.IsDark())
-		// m.updateListProperties()
-		// return m, nil
 		m.country.Update(msg)
 		m.world.Update(msg)
 		return m, nil
 	case tea.WindowSizeMsg:
-		// m.width, m.height = msg.Width, msg.Height
-		// m.updateListProperties()
-		// return m, nil
+		m.width, m.height = msg.Width, msg.Height
 		m.world.Update(msg)
 		m.country.Update(msg)
 		return m, nil

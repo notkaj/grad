@@ -11,20 +11,10 @@ import (
 )
 
 type Model struct {
-	width, height int
-	list          list.Model
-	source        source
-	fetching      bool
-	totalCount    int
-}
-
-func (m *Model) updateListProperties() {
-	// Update list size.
-	h, v := s.Styles.App.GetFrameSize()
-	m.list.SetSize(m.width-h, m.height-v)
-
-	// Update the model and list styles.
-	m.list.Styles.Title = s.Styles.Title
+	list       list.Model
+	source     source
+	fetching   bool
+	totalCount int
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -36,12 +26,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
 		s.LightDark = lipgloss.LightDark(msg.IsDark())
-		m.updateListProperties()
+		m.list.Styles.Title = s.Styles.Title
 		return m, nil
 
 	case tea.WindowSizeMsg:
-		m.width, m.height = msg.Width, msg.Height
-		m.updateListProperties()
+		width, height := s.Styles.App.GetFrameSize()
+		m.list.SetSize(msg.Width-width, msg.Height-height)
 		return m, nil
 
 	case sel.PopulatedMsg:
