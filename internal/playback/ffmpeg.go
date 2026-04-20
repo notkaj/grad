@@ -1,6 +1,7 @@
 package playback
 
 import (
+	"context"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -16,9 +17,10 @@ type ffmpegStreamer struct {
 	err    error
 }
 
-func newFFmpegStreamer(url string, sampleRate beep.SampleRate) (*ffmpegStreamer, error) {
+func newFFmpegStreamer(ctx context.Context, url string, sampleRate beep.SampleRate) (*ffmpegStreamer, error) {
 	// We request raw s16le PCM to avoid WAV header seeking issues over pipes.
-	cmd := exec.Command("ffmpeg",
+	// Using CommandContext ensures the process is killed when the context is cancelled.
+	cmd := exec.CommandContext(ctx, "ffmpeg",
 		"-i", url,
 		"-f", "s16le",
 		"-acodec", "pcm_s16le",
@@ -50,8 +52,10 @@ func (s *ffmpegStreamer) Stream(samples [][2]float64) (n int, ok bool) {
 
 	buf := make([]byte, len(samples)*4) // 2 channels * 2 bytes (s16le)
 	nBytes, err := io.ReadFull(s.stdout, buf)
-	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
-		s.err = err
+	if err != nil {
+		if err != io.EOF && err != io.ErrUnexpectedEOF {
+			s.err = err
+		}
 		return 0, false
 	}
 
@@ -65,10 +69,6 @@ func (s *ffmpegStreamer) Stream(samples [][2]float64) (n int, ok bool) {
 		samples[i][1] = float64(right) / 32768.0
 	}
 
-	if n == 0 && (err == io.EOF || err == io.ErrUnexpectedEOF) {
-		return 0, false
-	}
-
 	return n, true
 }
 
@@ -79,6 +79,7 @@ func (s *ffmpegStreamer) Err() error {
 func (s *ffmpegStreamer) Close() error {
 	if s.cmd != nil && s.cmd.Process != nil {
 		s.cmd.Process.Kill()
+		s.cmd.Wait() // Ensure process is reaped
 	}
 	if s.stdout != nil {
 		return s.stdout.Close()
