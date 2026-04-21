@@ -85,11 +85,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) View() tea.View {
 	backdrop := m.screen.ViewLayer()
-	playbackLayer := m.playbackCard.Layer(m.width, m.height)
+	playback := m.playbackCard.
+		Layer(m.width, m.height)
 
 	comp := lipgloss.NewCompositor(
 		backdrop,
-		playbackLayer,
+		playback,
 	)
 	var view tea.View
 	view.SetContent(comp.Render())

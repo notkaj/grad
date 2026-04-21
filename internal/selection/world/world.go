@@ -92,6 +92,8 @@ func InitialModel() Model {
 	delegate := newItemDelegate()
 	delegate.Styles.SelectedTitle = s.Styles.SeletectedTitle
 	delegate.Styles.SelectedDesc = s.Styles.SelectedDesc
+	delegate.Styles.NormalTitle = s.Styles.ItemTitle
+	delegate.Styles.NormalDesc = s.Styles.ItemDesc
 	countryList := list.New(nil, delegate, 0, 0)
 	countryList.Title = "Countries"
 	countryList.Styles.Title = s.Styles.Title

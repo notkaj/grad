@@ -10,26 +10,41 @@ type styleMap struct {
 	App             lipgloss.Style
 	Title           lipgloss.Style
 	StatusMessage   lipgloss.Style
+	ItemTitle       lipgloss.Style
+	ItemDesc        lipgloss.Style
 	SeletectedTitle lipgloss.Style
 	SelectedDesc    lipgloss.Style
+	Card            lipgloss.Style
 }
 
 var (
-	LightDark = lipgloss.LightDark(true)
-	Styles    = styleMap{
+	foreground = charmtone.Salt
+	base       = charmtone.Coral
+	selected   = charmtone.Tang
+	LightDark  = lipgloss.LightDark(true)
+	Styles     = styleMap{
 		App: lipgloss.
 			NewStyle().
 			Padding(1, 2).
 			Margin(1).
 			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#c4068b")),
+			BorderForeground(base),
 		Title: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#c4068b")).
+			Foreground(charmtone.Charcoal).
+			Background(base).
 			Padding(0, 1),
 		StatusMessage: lipgloss.NewStyle().
-			Foreground(LightDark(lipgloss.Color("#c4068b"), lipgloss.Color("#c4068b"))),
-		SeletectedTitle: lipgloss.NewStyle().Foreground(charmtone.Sriracha),
-		SelectedDesc:    lipgloss.NewStyle().Foreground(charmtone.Sriracha),
+			Foreground(LightDark(base, base)),
+		ItemTitle:       lipgloss.NewStyle().Foreground(foreground),
+		ItemDesc:        lipgloss.NewStyle().Foreground(foreground),
+		SeletectedTitle: lipgloss.NewStyle().Foreground(selected),
+		SelectedDesc:    lipgloss.NewStyle().Foreground(selected),
+		Card: lipgloss.NewStyle().
+			Width(40).
+			Height(20).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(charmtone.Lilac).
+			Foreground(foreground).
+			Align(lipgloss.Center, lipgloss.Center),
 	}
 )

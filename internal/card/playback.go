@@ -1,9 +1,9 @@
-// Package card provides cards/layers to display on top of the main UI
+// Package card provides card layers for UI
 package card
 
 import (
 	"charm.land/lipgloss/v2"
-	"github.com/charmbracelet/x/exp/charmtone"
+	s "github.com/notkaj/grad/internal/style"
 )
 
 type PlaybackModel struct {
@@ -12,7 +12,7 @@ type PlaybackModel struct {
 	Status      string
 }
 
-func (m PlaybackModel) Layer(width, height int) *lipgloss.Layer {
+func (m PlaybackModel) Layer(parentWidth, parentHeight int) *lipgloss.Layer {
 	content := m.StationName
 	if m.Codec != "" {
 		content += "\n" + m.Codec
@@ -24,16 +24,9 @@ func (m PlaybackModel) Layer(width, height int) *lipgloss.Layer {
 		content = "No station selected"
 	}
 
-	cardWidth := 40
-	cardHeight := 20
+	height := s.Styles.Card.GetHeight()
 
 	return lipgloss.NewLayer(
-		lipgloss.NewStyle().
-			Width(cardWidth).
-			Height(cardHeight).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(charmtone.Damson).
-			Align(lipgloss.Center, lipgloss.Center).
-			Render(content),
-	).X(width / 2).Y(height/2 - cardHeight/2)
+		s.Styles.Card.Render(content),
+	).X(parentWidth/2 - 5).Y(parentHeight/2 - height/2)
 }
