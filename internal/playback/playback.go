@@ -138,9 +138,9 @@ func (p *Player) playWithFFmpeg(ctx context.Context, url string) tea.Msg {
 	}
 
 	speaker.Lock()
+	defer speaker.Unlock()
 	p.current = s
 	p.mixer.Add(s)
-	speaker.Unlock()
 
 	return PlayerStartedMsg("Playing via FFmpeg (fallback)")
 }
