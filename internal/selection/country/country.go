@@ -99,11 +99,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return searchDebounceMsg{term: term, seq: seq}
 		}))
 
-	case !m.inSearch &&
+	case
 		m.list.Paginator.OnLastPage() &&
-		!m.fetching &&
-		!m.reachedEnd &&
-		!m.IsFiltering():
+			!m.fetching &&
+			!m.reachedEnd &&
+			!m.IsFiltering() &&
+			!m.inSearch:
 		m.fetching = true
 		cmds = append(cmds, m.Populate())
 	}

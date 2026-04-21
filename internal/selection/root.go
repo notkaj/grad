@@ -77,6 +77,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				return m, m.player.Play(m.player.URL)
 			}
+		case key.Matches(msg, Keys.VolumeUp):
+			m.player.SetVolume(m.player.Volume() + 0.1)
+			m.playbackCard.Volume = m.player.Volume()
+			return m, nil
+		case key.Matches(msg, Keys.VolumeDown):
+			m.player.SetVolume(m.player.Volume() - 0.1)
+			m.playbackCard.Volume = m.player.Volume()
+			return m, nil
+		case key.Matches(msg, Keys.Mute):
+			m.player.ToggleMute()
+			m.playbackCard.IsMuted = m.player.IsMuted()
+			return m, nil
 		}
 	}
 	_, cmd := m.screen.Update(msg)
@@ -101,10 +113,15 @@ func (m *Model) View() tea.View {
 func InitialModel() *Model {
 	worldModel := w.InitialModel()
 	countryModel := c.InitialModel()
+	player := playback.NewPlayer()
 	return &Model{
 		world:   &worldModel,
 		country: &countryModel,
 		screen:  &worldModel,
-		player:  playback.NewPlayer(),
+		player:  player,
+		playbackCard: card.PlaybackModel{
+			Volume:  player.Volume(),
+			IsMuted: player.IsMuted(),
+		},
 	}
 }

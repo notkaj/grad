@@ -12,6 +12,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/gopxl/beep"
+	"github.com/gopxl/beep/effects"
 	"github.com/gopxl/beep/flac"
 	"github.com/gopxl/beep/mp3"
 	"github.com/gopxl/beep/speaker"
@@ -22,6 +23,7 @@ type Player struct {
 	mu         sync.Mutex
 	URL        string
 	mixer      *beep.Mixer
+	volume     *effects.Volume
 	current    io.Closer
 	cancel     context.CancelFunc
 	sampleRate beep.SampleRate
@@ -31,8 +33,14 @@ func NewPlayer() *Player {
 	rate := beep.SampleRate(44100)
 	speaker.Init(rate, rate.N(time.Second/10))
 	mixer := &beep.Mixer{}
-	speaker.Play(mixer)
-	return &Player{sampleRate: rate, mixer: mixer}
+	volume := &effects.Volume{
+		Streamer: mixer,
+		Base:     2,
+		Volume:   0,
+		Silent:   false,
+	}
+	speaker.Play(volume)
+	return &Player{sampleRate: rate, mixer: mixer, volume: volume}
 }
 
 func (p *Player) Play(url string) tea.Cmd {
@@ -166,6 +174,30 @@ func (p *Player) IsPlaying() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.current != nil
+}
+
+func (p *Player) SetVolume(v float64) {
+	speaker.Lock()
+	defer speaker.Unlock()
+	p.volume.Volume = v
+}
+
+func (p *Player) Volume() float64 {
+	speaker.Lock()
+	defer speaker.Unlock()
+	return p.volume.Volume
+}
+
+func (p *Player) ToggleMute() {
+	speaker.Lock()
+	defer speaker.Unlock()
+	p.volume.Silent = !p.volume.Silent
+}
+
+func (p *Player) IsMuted() bool {
+	speaker.Lock()
+	defer speaker.Unlock()
+	return p.volume.Silent
 }
 
 type (

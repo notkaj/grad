@@ -7,6 +7,9 @@ type KeyMap struct {
 	Quickview      key.Binding
 	Back           key.Binding
 	TogglePlayback key.Binding
+	VolumeUp       key.Binding
+	VolumeDown     key.Binding
+	Mute           key.Binding
 }
 
 var Keys = KeyMap{
@@ -25,5 +28,17 @@ var Keys = KeyMap{
 	TogglePlayback: key.NewBinding(
 		key.WithKeys("space"),
 		key.WithHelp("space", "toggle playback"),
+	),
+	VolumeUp: key.NewBinding(
+		key.WithKeys("+", "="),
+		key.WithHelp("+", "volume up"),
+	),
+	VolumeDown: key.NewBinding(
+		key.WithKeys("-"),
+		key.WithHelp("-", "volume down"),
+	),
+	Mute: key.NewBinding(
+		key.WithKeys("m"),
+		key.WithHelp("m", "mute"),
 	),
 }
