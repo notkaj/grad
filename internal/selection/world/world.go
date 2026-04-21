@@ -11,8 +11,9 @@ import (
 )
 
 type Model struct {
-	list   list.Model
-	source source
+	list          list.Model
+	source        source
+	width, height int
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -32,8 +33,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.WindowSizeMsg:
-		width, height := s.Styles.App.GetFrameSize()
-		m.list.SetSize(msg.Width-width, msg.Height-height)
+		fw, fh := s.Styles.App.GetFrameSize()
+		m.width, m.height = msg.Width-fw, msg.Height-fh
+		m.list.SetSize(m.width, m.height)
 		return m, nil
 
 	case sel.PopulatedMsg:
@@ -50,7 +52,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() tea.View {
-	return tea.NewView(s.Styles.App.Render(m.list.View()))
+	return tea.NewView(
+		s.Styles.App.
+			Width(m.width).
+			Height(m.height).
+			Render(m.list.View()),
+	)
 }
 
 func (m *Model) SelectionInfo() (string, string) {
@@ -79,7 +86,13 @@ func (m *Model) IsFiltering() bool {
 }
 
 func (m *Model) ViewLayer() *lipgloss.Layer {
-	return lipgloss.NewLayer(s.Styles.App.Render(m.list.View()))
+	return lipgloss.
+		NewLayer(
+			s.Styles.App.
+				Width(m.width).
+				Height(m.height).
+				Render(m.list.View()),
+		)
 }
 
 func InitialModel() Model {
