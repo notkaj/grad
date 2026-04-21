@@ -13,7 +13,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/effects"
-	"github.com/gopxl/beep/flac"
 	"github.com/gopxl/beep/mp3"
 	"github.com/gopxl/beep/speaker"
 	"github.com/gopxl/beep/vorbis"
@@ -74,7 +73,6 @@ func (p *Player) Play(url string) tea.Cmd {
 
 		isOgg := strings.Contains(contentType, "ogg") || strings.Contains(contentType, "vorbis")
 		isMp3 := strings.Contains(contentType, "mpeg")
-		isFlac := strings.Contains(contentType, "flac")
 		isAAC := strings.Contains(contentType, "aac") || strings.Contains(contentType, "m4a")
 		isHLS := strings.Contains(contentType, "mpegurl") || strings.Contains(contentType, "apple.mpegurl")
 
@@ -82,8 +80,6 @@ func (p *Player) Play(url string) tea.Cmd {
 			streamer, format, err = vorbis.Decode(res.Body)
 		} else if isMp3 {
 			streamer, format, err = mp3.Decode(res.Body)
-		} else if isFlac {
-			streamer, format, err = flac.Decode(res.Body)
 		} else if isAAC {
 			nativeStreamer, nErr := newNativeAACStreamer(res.Body)
 			if nErr == nil {
@@ -95,7 +91,7 @@ func (p *Player) Play(url string) tea.Cmd {
 			}
 		}
 
-		if isHLS || (err != nil && (isOgg || isMp3 || isFlac)) || (isAAC && streamer == nil) {
+		if isHLS || (err != nil && (isOgg || isMp3)) || (isAAC && streamer == nil) {
 			res.Body.Close()
 			return p.playWithFFmpeg(ctx, url)
 		}
