@@ -81,7 +81,7 @@ func (p *Player) Play(url string) tea.Cmd {
 		} else if isMp3 {
 			streamer, format, err = mp3.Decode(res.Body)
 		} else if isAAC {
-			nativeStreamer, nErr := newNativeAACStreamer(res.Body)
+			nativeStreamer, nErr := aacDecode(res.Body)
 			if nErr == nil {
 				resampled := beep.Resample(4, nativeStreamer.format.SampleRate, p.sampleRate, nativeStreamer)
 				if p.setupPlayer(ctx, resampled, nativeStreamer) {
@@ -91,12 +91,7 @@ func (p *Player) Play(url string) tea.Cmd {
 			}
 		}
 
-		if isHLS || (err != nil && (isOgg || isMp3)) || (isAAC && streamer == nil) {
-			res.Body.Close()
-			return p.playWithFFmpeg(ctx, url)
-		}
-
-		if streamer == nil {
+		if isHLS || (err != nil && (isOgg || isMp3)) || streamer == nil {
 			res.Body.Close()
 			return p.playWithFFmpeg(ctx, url)
 		}

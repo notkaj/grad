@@ -20,7 +20,7 @@ type nativeAACStreamer struct {
 	err error
 }
 
-func newNativeAACStreamer(reader io.ReadCloser) (*nativeAACStreamer, error) {
+func aacDecode(reader io.ReadCloser) (*nativeAACStreamer, error) {
 	dec := aac.NewDecoder()
 
 	s := &nativeAACStreamer{
