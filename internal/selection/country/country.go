@@ -45,8 +45,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		fw, fh := s.Styles.App.GetFrameSize()
-		m.width, m.height = msg.Width-fw, msg.Height-fh
-		m.list.SetSize(m.width, m.height)
+		m.width, m.height = msg.Width, msg.Height
+		m.list.SetSize(m.width-fw, m.height-fh)
 		return m, nil
 
 	case sel.PopulatedMsg:
@@ -122,8 +122,6 @@ func searchFetch(term string) tea.Cmd {
 func (m *Model) View() tea.View {
 	return tea.NewView(
 		s.Styles.App.
-			Width(m.width).
-			Height(m.height).
 			Render(m.list.View()),
 	)
 }
@@ -176,8 +174,6 @@ func (m *Model) IsFiltering() bool {
 func (m *Model) ViewLayer() *lipgloss.Layer {
 	return lipgloss.NewLayer(
 		s.Styles.App.
-			Width(m.width).
-			Height(m.height).
 			Render(m.list.View()),
 	)
 }

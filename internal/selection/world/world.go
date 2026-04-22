@@ -34,8 +34,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		fw, fh := s.Styles.App.GetFrameSize()
-		m.width, m.height = msg.Width-fw, msg.Height-fh
-		m.list.SetSize(m.width, m.height)
+		m.width, m.height = msg.Width, msg.Height
+		m.list.SetSize(m.width-fw, m.height-fh)
 		return m, nil
 
 	case sel.PopulatedMsg:
@@ -54,15 +54,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) View() tea.View {
 	return tea.NewView(
 		s.Styles.App.
-			Width(m.width).
-			Height(m.height).
 			Render(m.list.View()),
 	)
 }
 
 func (m *Model) SelectionInfo() (string, string) {
-	i, ok := m.list.SelectedItem().(item)
-	if ok {
+	if i, ok := m.list.SelectedItem().(item); ok {
 		return i.id, i.title
 	}
 	return "", ""
@@ -72,7 +69,6 @@ func (m *Model) Populate() tea.Cmd {
 	return tea.Batch(
 		m.list.StartSpinner(),
 		func() tea.Msg {
-			// m.list.SetItems(m.source.items())
 			return sel.PopulatedMsg(m.source.items())
 		},
 	)
@@ -89,8 +85,6 @@ func (m *Model) ViewLayer() *lipgloss.Layer {
 	return lipgloss.
 		NewLayer(
 			s.Styles.App.
-				Width(m.width).
-				Height(m.height).
 				Render(m.list.View()),
 		)
 }
