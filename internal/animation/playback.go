@@ -8,9 +8,11 @@ import (
 	"charm.land/bubbles/v2/spinner"
 )
 
-var PlayingSpinner = spinner.Spinner{
-	Frames: frames(),
-	FPS:    time.Second / 10,
+func Playing() spinner.Spinner {
+	return spinner.Spinner{
+		Frames: frames(),
+		FPS:    time.Second / 10,
+	}
 }
 
 func frames() []string {
