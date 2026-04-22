@@ -27,7 +27,7 @@ var (
 			NewStyle().
 			Padding(1, 2).
 			Margin(1).
-			BorderStyle(lipgloss.RoundedBorder()).
+			// BorderStyle(lipgloss.RoundedBorder()).
 			BorderForeground(base),
 		Title: lipgloss.NewStyle().
 			Foreground(charmtone.Charcoal).
