@@ -61,7 +61,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.playbackCard.Status = "Loading..."
 				return m, m.player.Play(url)
 			}
-
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
 			case *c.Model:
