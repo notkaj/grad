@@ -22,7 +22,7 @@ var Keys = KeyMap{
 		key.WithHelp("i", "quick view"),
 	),
 	Back: key.NewBinding(
-		key.WithKeys("backspace"),
+		key.WithKeys("backspace", "ctrl+h", "esc"),
 		key.WithHelp("backspace", "back"),
 	),
 	TogglePlayback: key.NewBinding(
