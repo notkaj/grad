@@ -6,7 +6,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/notkaj/grad/internal/card"
-	"github.com/notkaj/grad/internal/playback"
 	c "github.com/notkaj/grad/internal/selection/country"
 	sel "github.com/notkaj/grad/internal/selection/selector"
 	w "github.com/notkaj/grad/internal/selection/world"
@@ -17,7 +16,6 @@ type Model struct {
 	world         *w.Model
 	country       *c.Model
 	screen        sel.Selector
-	player        *playback.Player
 	playbackCard  card.PlaybackModel
 }
 
@@ -27,12 +25,6 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case playback.PlayerStartedMsg:
-		m.playbackCard.Status = string(msg)
-		return m, nil
-	case playback.PlayerErrorMsg:
-		m.playbackCard.Status = "Error: " + string(msg)
-		return m, nil
 	case tea.BackgroundColorMsg:
 		m.country.Update(msg)
 		m.world.Update(msg)
@@ -42,62 +34,46 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.world.Update(msg)
 		m.country.Update(msg)
 		return m, nil
+	case sel.CountrySelectedMsg:
+		m.screen = m.country
+
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
 			break
 		}
 		switch {
-		case key.Matches(msg, Keys.Select):
-			switch t := m.screen.(type) {
-			case *w.Model:
-				id, name := t.SelectionInfo()
-				m.country.Select(sel.CountrySelectedMsg{Code: id, Name: name})
-				m.screen = m.country
-				return m, m.screen.Populate()
-			case *c.Model:
-				name, url, codec := t.SelectionInfo()
-				m.playbackCard.StationName = name
-				m.playbackCard.Codec = codec
-				m.playbackCard.Status = "Loading..."
-				return m, m.player.Play(url)
-			}
+		// case key.Matches(msg, Keys.Select):
+		// switch t := m.screen.(type) {
+		// case *w.Model:
+		// 	id, name := t.SelectionInfo()
+		// 	m.country.Select(sel.CountrySelectedMsg{Code: id, Name: name})
+		// 	m.screen = m.country
+		// 	return m, m.screen.Populate()
+		// case *c.Model:
+		// 	name, url, codec := t.SelectionInfo()
+		// 	m.playbackCard.StationName = name
+		// 	m.playbackCard.Codec = codec
+		// 	m.playbackCard.Status = "Loading..."
+		// 	return m, m.playbackCard.Player.Play(url)
+		// }
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
 			case *c.Model:
 				m.screen = m.world
 				return m, nil
 			}
-		case key.Matches(msg, Keys.TogglePlayback):
-			if m.player == nil {
-				return m, nil
-			}
-			if m.player.IsPlaying() {
-				m.player.Stop()
-			} else {
-				return m, m.player.Play(m.player.URL)
-			}
-		case key.Matches(msg, Keys.VolumeUp):
-			m.player.SetVolume(m.player.Volume() + 0.1)
-			m.playbackCard.Volume = m.player.Volume()
-			return m, nil
-		case key.Matches(msg, Keys.VolumeDown):
-			m.player.SetVolume(m.player.Volume() - 0.1)
-			m.playbackCard.Volume = m.player.Volume()
-			return m, nil
-		case key.Matches(msg, Keys.Mute):
-			m.player.ToggleMute()
-			m.playbackCard.IsMuted = m.player.IsMuted()
-			return m, nil
 		}
 	}
-	_, cmd := m.screen.Update(msg)
-	return m, cmd
+	_, screenCmd := m.screen.Update(msg)
+	c, cardCmd := m.playbackCard.Update(msg)
+	m.playbackCard = c.(card.PlaybackModel)
+	return m, tea.Batch(screenCmd, cardCmd)
 }
 
 func (m *Model) View() tea.View {
 	backdrop := m.screen.ViewLayer()
 	playback := m.playbackCard.
-		Layer(m.width, m.height)
+		ViewLayer(m.width, m.height)
 
 	comp := lipgloss.NewCompositor(
 		backdrop,
@@ -112,15 +88,10 @@ func (m *Model) View() tea.View {
 func InitialModel() *Model {
 	worldModel := w.InitialModel()
 	countryModel := c.InitialModel()
-	player := playback.NewPlayer()
 	return &Model{
-		world:   &worldModel,
-		country: &countryModel,
-		screen:  &worldModel,
-		player:  player,
-		playbackCard: card.PlaybackModel{
-			Volume:  player.Volume(),
-			IsMuted: player.IsMuted(),
-		},
+		world:        &worldModel,
+		country:      &countryModel,
+		screen:       &worldModel,
+		playbackCard: card.InitialPlaybackModel(),
 	}
 }

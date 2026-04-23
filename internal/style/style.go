@@ -36,7 +36,7 @@ var (
 		StatusMessage: lipgloss.NewStyle().
 			Foreground(LightDark(base, base)),
 		ItemTitle:       lipgloss.NewStyle().Foreground(foreground),
-		ItemDesc:        lipgloss.NewStyle().Foreground(foreground),
+		ItemDesc:        lipgloss.NewStyle().Foreground(charmtone.Squid),
 		SeletectedTitle: lipgloss.NewStyle().Foreground(selected),
 		SelectedDesc:    lipgloss.NewStyle().Foreground(selected),
 		Card: lipgloss.NewStyle().

@@ -2,6 +2,7 @@
 package world
 
 import (
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/list"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
@@ -41,6 +42,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case sel.PopulatedMsg:
 		m.list.SetItems(msg)
 		m.list.StopSpinner()
+
+	case tea.KeyPressMsg:
+		if m.IsFiltering() {
+			break
+		}
+		switch {
+		case key.Matches(msg, sel.Keys.Select):
+			return m, func() tea.Msg {
+				code, name := m.selectionInfo()
+				return sel.CountrySelectedMsg{Code: code, Name: name}
+			}
+		}
 	}
 
 	// This will also call our delegate's update function.
@@ -58,7 +71,7 @@ func (m *Model) View() tea.View {
 	)
 }
 
-func (m *Model) SelectionInfo() (string, string) {
+func (m *Model) selectionInfo() (string, string) {
 	if i, ok := m.list.SelectedItem().(item); ok {
 		return i.id, i.title
 	}

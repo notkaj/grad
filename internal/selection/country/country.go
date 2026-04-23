@@ -4,6 +4,7 @@ package country
 import (
 	"time"
 
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/list"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
@@ -65,6 +66,21 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case searchResultMsg:
 		m.list.StopSpinner()
 		return m, m.list.SetItems([]list.Item(msg))
+
+	case sel.CountrySelectedMsg:
+		m.choose(msg)
+		return m, m.Populate()
+
+	case tea.KeyPressMsg:
+		if m.IsFiltering() {
+			break
+		}
+		if key.Matches(msg, sel.Keys.Select) {
+			return m, func() tea.Msg {
+				title, url, codec := m.selectionInfo()
+				return sel.StationSelectedMsg{Title: title, URL: url, Codec: codec}
+			}
+		}
 	}
 
 	prevTerm := m.list.FilterInput.Value()
@@ -144,7 +160,7 @@ func (m *Model) Populate() tea.Cmd {
 	)
 }
 
-func (m *Model) Select(msg sel.Msg) {
+func (m *Model) choose(msg sel.Msg) {
 	m.source.currentChunk = 0
 	m.inSearch = false
 	m.reachedEnd = false
@@ -178,7 +194,7 @@ func (m *Model) ViewLayer() *lipgloss.Layer {
 	)
 }
 
-func (m *Model) SelectionInfo() (string, string, string) {
+func (m *Model) selectionInfo() (string, string, string) {
 	if i, ok := m.list.SelectedItem().(item); ok {
 		return i.title, i.url, i.codec
 	}

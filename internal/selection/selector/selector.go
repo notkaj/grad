@@ -10,7 +10,6 @@ import (
 type Selector interface {
 	tea.Model
 	Populate() tea.Cmd
-	Select(Msg)
 	IsFiltering() bool
 	ViewLayer() *lipgloss.Layer
 }
@@ -22,4 +21,10 @@ type Msg any
 type CountrySelectedMsg struct {
 	Code string
 	Name string
+}
+
+type StationSelectedMsg struct {
+	Title string
+	URL   string
+	Codec string
 }

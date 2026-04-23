@@ -1,21 +1,16 @@
-package selection
+package selector
 
 import "charm.land/bubbles/v2/key"
 
-type KeyMap struct {
-	Select    key.Binding
-	Quickview key.Binding
-	Back      key.Binding
+type keyMap struct {
+	Select key.Binding
+	Back   key.Binding
 }
 
-var Keys = KeyMap{
+var Keys = keyMap{
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "choose"),
-	),
-	Quickview: key.NewBinding(
-		key.WithKeys("i"),
-		key.WithHelp("i", "quick view"),
 	),
 	Back: key.NewBinding(
 		key.WithKeys("backspace", "ctrl+h", "esc"),

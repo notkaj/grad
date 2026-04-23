@@ -2,6 +2,7 @@ package country
 
 import (
 	"fmt"
+	"strings"
 
 	"charm.land/bubbles/v2/list"
 	g "gitlab.com/notkaj/goradios"
@@ -37,7 +38,7 @@ func (s source) items() []list.Item {
 		// 	fmt.Fprintf(&builder, "last check FAILED at %s", station.LastCheckTime)
 		// }
 		desc := fmt.Sprintf("%s, %d clicks", station.Codec, station.ClickCount)
-		items[i] = NewItem(station.Name, desc, station.StationUUID, station.URLResolved, station.Codec)
+		items[i] = NewItem(strings.TrimSpace(station.Name), desc, station.StationUUID, station.URLResolved, station.Codec)
 	}
 	return items
 }
