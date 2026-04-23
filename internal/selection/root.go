@@ -20,7 +20,7 @@ type Model struct {
 }
 
 func (m *Model) Init() tea.Cmd {
-	return m.screen.Init()
+	return tea.Batch(m.screen.Init(), m.playbackCard.Init())
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

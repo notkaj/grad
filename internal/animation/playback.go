@@ -11,13 +11,13 @@ import (
 func Playing() spinner.Spinner {
 	return spinner.Spinner{
 		Frames: frames(),
-		FPS:    time.Second / 10,
+		FPS:    time.Second / 7,
 	}
 }
 
 func frames() []string {
-	var frames [5]string
-	for f := range 5 {
+	var frames [20]string
+	for f := range frames {
 		var runes [3]rune
 		for r := range 3 {
 			i := rand.Intn(8)

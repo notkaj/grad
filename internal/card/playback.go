@@ -2,13 +2,11 @@
 package card
 
 import (
-	"fmt"
-	"math"
-
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/notkaj/grad/internal/animation"
 	"github.com/notkaj/grad/internal/playback"
 	sel "github.com/notkaj/grad/internal/selection/selector"
 	s "github.com/notkaj/grad/internal/style"
@@ -24,11 +22,13 @@ type PlaybackModel struct {
 }
 
 func InitialPlaybackModel() PlaybackModel {
-	return PlaybackModel{Status: "Nothing Selected", Player: playback.NewPlayer()}
+	s := spinner.New()
+	s.Spinner = animation.Playing()
+	return PlaybackModel{Status: "Nothing Selected", Player: playback.NewPlayer(), playingSpinner: s}
 }
 
 func (m PlaybackModel) Init() tea.Cmd {
-	return nil
+	return m.playingSpinner.Tick
 }
 
 func (m PlaybackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -105,31 +105,16 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 	// format/codec
 	// location
 	//
-
-	content := m.StationName
-	if m.Codec != "" {
-		content += "\n" + m.Codec
-	}
-	if m.Status != "" {
-		content += "\n\n" + m.Status
-	}
-
-	vol := fmt.Sprintf("\nVolume: %.0f%%", m.volumeToPercent())
-	if m.Player.IsMuted() {
-		vol += " (Muted)"
-	}
-	content += vol
-
-	if content == "" {
-		content = "No station selected"
-	}
+	header := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Align(lipgloss.Center).Render(m.StationName)
+	spinner := m.playingSpinner.View()
+	content := lipgloss.JoinVertical(lipgloss.Top, header, spinner)
 
 	return lipgloss.NewLayer(
 		s.Styles.Card.Render(content),
 	).X(parentWidth/2 - 10).Y(parentHeight/2 - height/2)
 }
 
-func (m PlaybackModel) volumeToPercent() float64 {
-	// Using base 2, so 2^Volume * 100
-	return math.Pow(2, m.Player.Volume()) * 100
-}
+// func (m PlaybackModel) volumeToPercent() float64 {
+// 	// Using base 2, so 2^Volume * 100
+// 	return math.Pow(2, m.Player.Volume()) * 100
+// }
