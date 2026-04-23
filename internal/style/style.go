@@ -44,6 +44,13 @@ var (
 			Height(20).
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(charmtone.Lilac).
+			BorderForegroundBlend(
+				charmtone.Cherry,
+				charmtone.Charple,
+				charmtone.Guac,
+				charmtone.Charple,
+				charmtone.Sriracha,
+			).
 			Foreground(foreground).
 			Align(lipgloss.Center, lipgloss.Center),
 	}
