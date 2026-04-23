@@ -77,8 +77,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if key.Matches(msg, sel.Keys.Select) {
 			return m, func() tea.Msg {
-				title, url, codec := m.selectionInfo()
-				return sel.StationSelectedMsg{Title: title, URL: url, Codec: codec}
+				title, url, homepage, codec := m.selectionInfo()
+				return sel.StationSelectedMsg{Title: title, URL: url, Homepage: homepage, Codec: codec}
 			}
 		}
 	}
@@ -194,11 +194,11 @@ func (m *Model) ViewLayer() *lipgloss.Layer {
 	)
 }
 
-func (m *Model) selectionInfo() (string, string, string) {
+func (m *Model) selectionInfo() (string, string, string, string) {
 	if i, ok := m.list.SelectedItem().(item); ok {
-		return i.title, i.url, i.codec
+		return i.title, i.url, i.homepage, i.codec
 	}
-	return "", "", ""
+	return "", "", "", ""
 }
 
 func InitialModel() Model {

@@ -24,7 +24,8 @@ type CountrySelectedMsg struct {
 }
 
 type StationSelectedMsg struct {
-	Title string
-	URL   string
-	Codec string
+	Title    string
+	URL      string
+	Homepage string
+	Codec    string
 }

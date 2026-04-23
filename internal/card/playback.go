@@ -16,6 +16,7 @@ type PlaybackModel struct {
 	StationName    string
 	Codec          string
 	Status         string
+	Homepage       string
 	playingSpinner spinner.Model
 	loadingSpinner spinner.Model
 	Player         *playback.Player
@@ -43,6 +44,7 @@ func (m PlaybackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case sel.StationSelectedMsg:
 		m.StationName = msg.Title
 		m.Codec = msg.Codec
+		m.Homepage = msg.Homepage
 		url := msg.URL
 		return m, m.Player.Play(url)
 
@@ -84,7 +86,10 @@ func (m PlaybackModel) View() tea.View {
 }
 
 func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer {
-	height := s.Styles.Card.GetHeight()
+	fullWidth := s.Styles.Card.GetWidth()
+	fullHeight := s.Styles.Card.GetHeight()
+	frameWidth, frameHeight := s.Styles.Card.GetFrameSize()
+	width, height := fullWidth-frameWidth, fullHeight-frameHeight
 	if m.StationName == "" {
 		return lipgloss.NewLayer(
 			s.Styles.Card.Render("Select Station!"),
@@ -105,9 +110,32 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 	// format/codec
 	// location
 	//
-	header := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Align(lipgloss.Center).Render(m.StationName)
-	spinner := m.playingSpinner.View()
-	content := lipgloss.JoinVertical(lipgloss.Top, header, spinner)
+	halfWidth := width / 2
+	header := lipgloss.NewStyle().
+		Width(width).
+		Border(lipgloss.RoundedBorder()).
+		Align(lipgloss.Center).
+		Render(m.StationName)
+	footer := lipgloss.JoinHorizontal(
+		lipgloss.Left,
+		lipgloss.NewStyle().Width(halfWidth).Align(lipgloss.Left).Render(m.Codec),
+		lipgloss.NewStyle().Width(width-halfWidth).Align(lipgloss.Right).Render(m.Status),
+	)
+
+	spinner := lipgloss.NewStyle().
+		Width(width).
+		Height(height - lipgloss.Height(header) - lipgloss.Height(footer)).
+		AlignHorizontal(lipgloss.Center).
+		AlignVertical(lipgloss.Center).
+		Render(m.playingSpinner.View() + "\n" + m.Homepage)
+
+	content := lipgloss.
+		JoinVertical(
+			lipgloss.Top,
+			header,
+			spinner,
+			footer,
+		)
 
 	return lipgloss.NewLayer(
 		s.Styles.Card.Render(content),
