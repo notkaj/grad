@@ -105,12 +105,13 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 	fullHeight := s.Styles.Card.GetHeight()
 	frameWidth, frameHeight := s.Styles.Card.GetFrameSize()
 	width, height := fullWidth-frameWidth, fullHeight-frameHeight
-	if m.StationName == "" {
-		return lipgloss.NewLayer(
-			s.Styles.Card.Render("Select Station!"),
-		).
-			X(parentWidth/2 - 10).
-			Y(parentHeight/2 - height/2)
+	if m.state == noSelection {
+		// return lipgloss.NewLayer(
+		// 	s.Styles.Card.Render("Select Station!"),
+		// ).
+		// 	X(parentWidth/2 - 10).
+		// 	Y(parentHeight/2 - height/2)
+		return lipgloss.NewLayer("")
 	}
 	// what info do i want?
 	// station name
@@ -125,7 +126,8 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 	// format/codec
 	// location
 	//
-	halfWidth := width / 2
+	thirdWidth := width / 3
+	volumePercent := fmt.Sprintf("%.2f", m.volumeToPercent())
 	header := lipgloss.NewStyle().
 		Width(width).
 		Border(lipgloss.RoundedBorder()).
@@ -133,8 +135,18 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 		Render(m.StationName)
 	footer := lipgloss.JoinHorizontal(
 		lipgloss.Left,
-		lipgloss.NewStyle().Width(halfWidth).Align(lipgloss.Left).Render(m.Codec),
-		lipgloss.NewStyle().Width(width-halfWidth).Align(lipgloss.Right).Render(m.Status),
+		lipgloss.NewStyle().
+			Width(thirdWidth).
+			Align(lipgloss.Left).
+			Render(m.Codec),
+		lipgloss.NewStyle().
+			Width(thirdWidth).
+			Align(lipgloss.Center).
+			Render(volumePercent),
+		lipgloss.NewStyle().
+			Width(width-2*thirdWidth).
+			Align(lipgloss.Right).
+			Render(m.Status),
 	)
 
 	spinner := lipgloss.NewStyle().
