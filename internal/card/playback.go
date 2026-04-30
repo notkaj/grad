@@ -16,29 +16,32 @@ import (
 )
 
 type PlaybackModel struct {
-	StationName    string
-	Codec          string
-	Status         string
-	Homepage       string
-	playingSpinner spinner.Model
-	loadingSpinner spinner.Model
-	Player         *playback.Player
-	state          state
+	StationName     string
+	Codec           string
+	Status          string
+	Homepage        string
+	playbackSpinner spinner.Model
+	loadingSpinner  spinner.Model
+	Player          *playback.Player
+	state           state
 }
 
 func InitialPlaybackModel() PlaybackModel {
-	s := spinner.New()
-	s.Spinner = animation.Playing()
+	playbackSpinner := spinner.New()
+	playbackSpinner.Spinner = animation.Playing()
+	loadingSpinner := spinner.New()
+	loadingSpinner.Spinner = spinner.Dot
 	return PlaybackModel{
-		Status:         "Nothing Selected",
-		Player:         playback.NewPlayer(),
-		playingSpinner: s,
-		state:          noSelection,
+		Status:          "Nothing Selected",
+		Player:          playback.NewPlayer(),
+		playbackSpinner: playbackSpinner,
+		loadingSpinner:  loadingSpinner,
+		state:           noSelection,
 	}
 }
 
 func (m PlaybackModel) Init() tea.Cmd {
-	return m.playingSpinner.Tick
+	return tea.Batch(m.playbackSpinner.Tick, m.loadingSpinner.Tick)
 }
 
 func (m PlaybackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -88,7 +91,7 @@ func (m PlaybackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	var playingCmd tea.Cmd
 	var loadingCmd tea.Cmd
-	m.playingSpinner, playingCmd = m.playingSpinner.Update(msg)
+	m.playbackSpinner, playingCmd = m.playbackSpinner.Update(msg)
 	m.loadingSpinner, loadingCmd = m.loadingSpinner.Update(msg)
 	return m, tea.Batch(playingCmd, loadingCmd)
 }
@@ -149,18 +152,27 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 			Render(m.Status),
 	)
 
-	spinner := lipgloss.NewStyle().
+	playbackVisual := ""
+
+	if m.state == playing {
+		playbackVisual = m.playbackSpinner.View()
+	}
+	if m.state == loading {
+		playbackVisual = m.loadingSpinner.View()
+	}
+
+	main := lipgloss.NewStyle().
 		Width(width).
 		Height(height - lipgloss.Height(header) - lipgloss.Height(footer)).
 		AlignHorizontal(lipgloss.Center).
 		AlignVertical(lipgloss.Center).
-		Render(m.playingSpinner.View() + "\n" + m.Homepage)
+		Render(playbackVisual + "\n" + m.Homepage)
 
 	content := lipgloss.
 		JoinVertical(
 			lipgloss.Top,
 			header,
-			spinner,
+			main,
 			footer,
 		)
 
