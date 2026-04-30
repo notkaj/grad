@@ -42,20 +42,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			break
 		}
 		switch {
-		// case key.Matches(msg, Keys.Select):
-		// switch t := m.screen.(type) {
-		// case *w.Model:
-		// 	id, name := t.SelectionInfo()
-		// 	m.country.Select(sel.CountrySelectedMsg{Code: id, Name: name})
-		// 	m.screen = m.country
-		// 	return m, m.screen.Populate()
-		// case *c.Model:
-		// 	name, url, codec := t.SelectionInfo()
-		// 	m.playbackCard.StationName = name
-		// 	m.playbackCard.Codec = codec
-		// 	m.playbackCard.Status = "Loading..."
-		// 	return m, m.playbackCard.Player.Play(url)
-		// }
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
 			case *c.Model:
