@@ -3,7 +3,6 @@ package playback
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -85,7 +84,7 @@ func (p *Player) Play(url string) tea.Cmd {
 			if nErr == nil {
 				resampled := beep.Resample(4, nativeStreamer.format.SampleRate, p.sampleRate, nativeStreamer)
 				if p.setupPlayer(ctx, resampled, nativeStreamer) {
-					return PlayerStartedMsg(fmt.Sprintf("Playing %s (native)", contentType))
+					return PlayerStartedMsg("aac (native)")
 				}
 				return nil
 			}
@@ -98,7 +97,7 @@ func (p *Player) Play(url string) tea.Cmd {
 
 		resampled := beep.Resample(4, format.SampleRate, p.sampleRate, streamer)
 		if p.setupPlayer(ctx, resampled, streamer) {
-			return PlayerStartedMsg(fmt.Sprintf("Playing %s", contentType))
+			return PlayerStartedMsg("native")
 		}
 		return nil
 	}
@@ -142,7 +141,7 @@ func (p *Player) playWithFFmpeg(ctx context.Context, url string) tea.Msg {
 	p.current = s
 	p.mixer.Add(s)
 
-	return PlayerStartedMsg("Playing via FFmpeg (fallback)")
+	return PlayerStartedMsg("ffmpeg")
 }
 
 func (p *Player) Stop() {
