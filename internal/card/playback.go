@@ -130,7 +130,7 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 	// location
 	//
 	thirdWidth := width / 3
-	volumePercent := fmt.Sprintf("%.2f", m.volumeToPercent())
+	volumePercent := fmt.Sprintf("Volume: %.0f%%", m.volumeToPercent())
 	header := lipgloss.NewStyle().
 		Width(width).
 		Border(lipgloss.RoundedBorder()).
