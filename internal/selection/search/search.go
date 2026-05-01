@@ -1,7 +1,9 @@
-// Package stations provides selector for stations by country
-package stations
+// Package search provides selector for searching all stations
+package search
 
 import (
+	"time"
+
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/list"
 	"charm.land/bubbles/v2/spinner"
@@ -11,16 +13,25 @@ import (
 	s "github.com/notkaj/grad/internal/style"
 )
 
+type searchDebounceMsg struct {
+	term string
+	seq  int
+}
+
+type searchResultMsg []list.Item
+
 type Model struct {
 	list          list.Model
 	source        source
 	fetching      bool
 	reachedEnd    bool
+	inSearch      bool
+	searchSeq     int
 	width, height int
 }
 
 func (m *Model) Init() tea.Cmd {
-	return nil
+	return m.Populate()
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -45,8 +56,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.list.SetItems(append(m.list.Items(), msg...))
 
 	case sel.CountrySelectedMsg:
-		m.choose(msg)
 		return m, m.Populate()
+
+	case searchDebounceMsg:
+		if msg.seq == m.searchSeq && msg.term != "" {
+			cmds = append(cmds, m.list.StartSpinner(), searchFetch(msg.term))
+		}
+		return m, tea.Batch(cmds...)
+
+	case searchResultMsg:
+		m.list.StopSpinner()
+		return m, m.list.SetItems([]list.Item(msg))
 
 	case tea.KeyPressMsg:
 		if m.IsFiltering() {
@@ -60,19 +80,55 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	prevTerm := m.list.FilterInput.Value()
+
 	newListModel, cmd := m.list.Update(msg)
 	cmds = append(cmds, cmd)
 	m.list = newListModel
 
-	if m.list.Paginator.OnLastPage() &&
-		!m.fetching &&
-		!m.reachedEnd &&
-		!m.IsFiltering() {
+	newTerm := m.list.FilterInput.Value()
+	newState := m.list.FilterState()
+
+	switch {
+	case m.inSearch && (newState == list.Unfiltered || newTerm == ""):
+		m.inSearch = false
+		m.source = allStationSource()
+		m.reachedEnd = false
+		m.list.Title = "Stations"
+		m.fetching = false
+		var empty []list.Item
+		m.list.SetItems(empty)
+		cmds = append(cmds, m.Populate())
+
+	case newTerm != prevTerm && newTerm != "":
+		if !m.inSearch {
+			m.inSearch = true
+		}
+		m.searchSeq++
+		seq := m.searchSeq
+		term := newTerm
+		cmds = append(cmds, tea.Tick(300*time.Millisecond, func(time.Time) tea.Msg {
+			return searchDebounceMsg{term: term, seq: seq}
+		}))
+
+	case
+		m.list.Paginator.OnLastPage() &&
+			!m.fetching &&
+			!m.reachedEnd &&
+			!m.IsFiltering() &&
+			!m.inSearch:
 		m.fetching = true
 		cmds = append(cmds, m.Populate())
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func searchFetch(term string) tea.Cmd {
+	return func() tea.Msg {
+		src := searchSource(term)
+		return searchResultMsg(src.items())
+	}
 }
 
 func (m *Model) View() tea.View {
@@ -100,17 +156,6 @@ func (m *Model) Populate() tea.Cmd {
 	)
 }
 
-func (m *Model) choose(msg sel.CountrySelectedMsg) {
-	m.source.currentChunk = 0
-	m.reachedEnd = false
-	m.list.ResetFilter()
-	var items []list.Item
-	m.list.SetItems(items)
-	m.list.Title = msg.Name
-	m.list.SetFilteringEnabled(false)
-	m.source = stationsByCountryCodeSource(msg.Code)
-}
-
 func (m *Model) IsFiltering() bool {
 	return m.list.FilterState() == list.Filtering
 }
@@ -132,6 +177,7 @@ func (m *Model) selectionInfo() (string, string, string, string) {
 func InitialModel() Model {
 	m := Model{}
 	s.LightDark = lipgloss.LightDark(true)
+	m.source = allStationSource()
 
 	delegate := newItemDelegate()
 	delegate.Styles.SelectedTitle = s.Styles.SeletectedTitle

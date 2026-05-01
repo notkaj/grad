@@ -6,15 +6,17 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/notkaj/grad/internal/card"
-	s "github.com/notkaj/grad/internal/selection/stations"
+	"github.com/notkaj/grad/internal/selection/countries"
+	"github.com/notkaj/grad/internal/selection/search"
 	sel "github.com/notkaj/grad/internal/selection/selector"
-	c "github.com/notkaj/grad/internal/selection/countries"
+	"github.com/notkaj/grad/internal/selection/stations"
 )
 
 type Model struct {
 	width, height int
-	countries     *c.Model
-	stations      *s.Model
+	countries     *countries.Model
+	stations      *stations.Model
+	search        *search.Model
 	screen        sel.Selector
 	playbackCard  card.PlaybackModel
 }
@@ -28,14 +30,20 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.BackgroundColorMsg:
 		m.stations.Update(msg)
 		m.countries.Update(msg)
+		m.search.Update(msg)
 		return m, nil
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		m.countries.Update(msg)
 		m.stations.Update(msg)
+		m.search.Update(msg)
 		return m, nil
 	case sel.CountrySelectedMsg:
-		m.screen = m.stations
+		if msg.Code == "ALL" {
+			m.screen = m.search
+		} else {
+			m.screen = m.stations
+		}
 
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
@@ -45,7 +53,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
-			case *s.Model:
+			case *stations.Model, *search.Model:
 				m.screen = m.countries
 				return m, nil
 			}
@@ -73,11 +81,13 @@ func (m *Model) View() tea.View {
 }
 
 func InitialModel() *Model {
-	countriesModel := c.InitialModel()
-	stationsModel := s.InitialModel()
+	countriesModel := countries.InitialModel()
+	stationsModel := stations.InitialModel()
+	searchModel := search.InitialModel()
 	return &Model{
 		countries:    &countriesModel,
 		stations:     &stationsModel,
+		search:       &searchModel,
 		screen:       &countriesModel,
 		playbackCard: card.InitialPlaybackModel(),
 	}
