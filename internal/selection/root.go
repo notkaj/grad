@@ -39,7 +39,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
-			break
+			_, cmd := m.screen.Update(msg)
+			return m, cmd
 		}
 		switch {
 		case key.Matches(msg, Keys.Back):
