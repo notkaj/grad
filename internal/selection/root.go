@@ -6,15 +6,15 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/notkaj/grad/internal/card"
-	c "github.com/notkaj/grad/internal/selection/country"
+	s "github.com/notkaj/grad/internal/selection/stations"
 	sel "github.com/notkaj/grad/internal/selection/selector"
-	w "github.com/notkaj/grad/internal/selection/world"
+	c "github.com/notkaj/grad/internal/selection/countries"
 )
 
 type Model struct {
 	width, height int
-	world         *w.Model
-	country       *c.Model
+	countries     *c.Model
+	stations      *s.Model
 	screen        sel.Selector
 	playbackCard  card.PlaybackModel
 }
@@ -26,16 +26,16 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.BackgroundColorMsg:
-		m.country.Update(msg)
-		m.world.Update(msg)
+		m.stations.Update(msg)
+		m.countries.Update(msg)
 		return m, nil
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		m.world.Update(msg)
-		m.country.Update(msg)
+		m.countries.Update(msg)
+		m.stations.Update(msg)
 		return m, nil
 	case sel.CountrySelectedMsg:
-		m.screen = m.country
+		m.screen = m.stations
 
 	case tea.KeyPressMsg:
 		if m.screen.IsFiltering() {
@@ -45,15 +45,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, Keys.Back):
 			switch m.screen.(type) {
-			case *c.Model:
-				m.screen = m.world
+			case *s.Model:
+				m.screen = m.countries
 				return m, nil
 			}
 		}
 	}
 	_, screenCmd := m.screen.Update(msg)
-	c, cardCmd := m.playbackCard.Update(msg)
-	m.playbackCard = c.(card.PlaybackModel)
+	res, cardCmd := m.playbackCard.Update(msg)
+	m.playbackCard = res.(card.PlaybackModel)
 	return m, tea.Batch(screenCmd, cardCmd)
 }
 
@@ -73,12 +73,12 @@ func (m *Model) View() tea.View {
 }
 
 func InitialModel() *Model {
-	worldModel := w.InitialModel()
-	countryModel := c.InitialModel()
+	countriesModel := c.InitialModel()
+	stationsModel := s.InitialModel()
 	return &Model{
-		world:        &worldModel,
-		country:      &countryModel,
-		screen:       &worldModel,
+		countries:    &countriesModel,
+		stations:     &stationsModel,
+		screen:       &countriesModel,
 		playbackCard: card.InitialPlaybackModel(),
 	}
 }

@@ -1,4 +1,4 @@
-package country
+package stations
 
 type item struct {
 	title       string

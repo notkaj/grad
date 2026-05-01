@@ -1,5 +1,5 @@
-// Package country provides selector for stations
-package country
+// Package stations provides selector for stations
+package stations
 
 import (
 	"time"

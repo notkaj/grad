@@ -1,5 +1,5 @@
-// Package world provides list of countries
-package world
+// Package countries provides list of countries
+package countries
 
 import (
 	"charm.land/bubbles/v2/key"

@@ -1,4 +1,4 @@
-package world
+package countries
 
 import (
 	"fmt"

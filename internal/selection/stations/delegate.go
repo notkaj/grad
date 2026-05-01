@@ -1,4 +1,4 @@
-package country
+package stations
 
 import (
 	"charm.land/bubbles/v2/key"
