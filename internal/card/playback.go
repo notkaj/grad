@@ -152,7 +152,7 @@ func (m PlaybackModel) ViewLayer(parentWidth, parentHeight int) *lipgloss.Layer 
 			Render(m.Status),
 	)
 
-	playbackVisual := ""
+	playbackVisual := "██"
 
 	if m.state == playing {
 		playbackVisual = m.playbackSpinner.View()
