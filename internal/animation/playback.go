@@ -18,8 +18,8 @@ func Playing() spinner.Spinner {
 func frames() []string {
 	var frames [20]string
 	for f := range frames {
-		var runes [3]rune
-		for r := range 3 {
+		var runes [4]rune
+		for r := range runes {
 			i := rand.Intn(8)
 			runes[r] = b[i]
 		}
