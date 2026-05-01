@@ -21,11 +21,7 @@ type source struct {
 func (s source) items() []list.Item {
 	var stations []g.Station
 	start := s.currentChunk * s.chunkSize
-	if s.by == "" {
-		stations = g.FetchAllStationsDetailed(s.order, s.reversed, start, s.chunkSize, s.hideBroken)
-	} else {
-		stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, start, s.chunkSize, s.hideBroken)
-	}
+	stations = g.FetchStationsDetailed(s.by, s.term, s.order, s.reversed, start, s.chunkSize, s.hideBroken)
 	len := len(stations)
 	items := make([]list.Item, len)
 	for i, station := range stations {
